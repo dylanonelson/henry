@@ -1,0 +1,28 @@
+body {
+  background: #ccc;
+}
+
+#editor {
+  background: transparent;
+  position: relative;
+  margin: auto;
+  margin-top: 25%;
+  max-width: 550px;
+  min-height: 150px;
+}
+
+.ProseMirror {
+  background: #eee;
+}
+
+.checkbox {
+  background: rgba(0,0,0,0.4);
+  height: 15px;
+  left: -25px;
+  position: absolute;
+  width: 15px;
+}
+
+.checklist-item {
+  min-height: 20px;
+}
