@@ -1,22 +1,49 @@
-import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, TextSelection } from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
+const cidFactory = () => {
+  let factory = null;
+
+  const getter = () => {
+    if (factory !== null) {
+      return factory;
+    }
+
+    let counter = 0;
+    const createCid = () => {
+      const nextId = `c${counter}`;
+      counter += 1;
+      return nextId;
+    }
+
+    factory = {
+      createCid,
+    };
+
+    return factory;
+  };
+
+  return getter();
+};
+
+function isNodeType(node, typeName) {
+  return (
+    (node &&
+    typeof typeName === 'string' &&
+    node.type.name === typeName) ||
+  false);
+}
+
 const initialize = ({ dispatchTransaction }) => {
   const schema = new Schema({
     nodes: {
-      // checkbox: {
-      //   inline: true,
-      //   toDOM(node) {
-      //     return ;
-      //   },
-      // },
       checklistItem: {
         attrs: {
           itemId: {
-            default: null,
+            default: cidFactory().createCid(),
           },
         },
         content: 'text*',
@@ -32,7 +59,34 @@ const initialize = ({ dispatchTransaction }) => {
 
   const state = EditorState.create({
     plugins: [
-      keymap(baseKeymap),
+      keymap(Object.assign({}, baseKeymap, {
+        Enter: (...args) => {
+          const [state, dispatch] = args;
+          const { $from } = state.selection;
+          const { parent } = $from;
+
+          if (isNodeType(parent, 'checklistItem') === false) {
+            return baseKeymap.Enter(...args);
+          }
+
+          const { selection, tr } = state;
+
+          if (selection instanceof TextSelection) {
+            tr.deleteSelection()
+          }
+
+          const itemId = cidFactory().createCid();
+
+          tr.split($from.pos, 1, [{
+            attrs: { itemId },
+            type: schema.nodes.checklistItem,
+          }]);
+
+          dispatch(tr);
+
+          return true;
+        },
+      })),
     ],
     schema,
   });
@@ -40,6 +94,24 @@ const initialize = ({ dispatchTransaction }) => {
   const view = new EditorView(
     document.querySelector('#editor'),
     {
+      decorations: state => {
+        let decorations = [];
+        state.doc.descendants((node, pos) => {
+          if (node.type.name === 'checklistItem') {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('checkbox');
+
+            decorations.push(
+              new Decoration.widget(pos, checkbox)
+            );
+
+            return false;
+          }
+        });
+
+        return DecorationSet.create(state.doc, decorations);
+      },
       dispatchTransaction: transaction => {
         dispatchTransaction(transaction, view);
       },
@@ -49,11 +121,7 @@ const initialize = ({ dispatchTransaction }) => {
           dom.classList.add('checklist-item');
           const contentDOM = document.createElement('span');
           contentDOM.classList.add('checklist-content');
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.classList.add('checkbox');
 
-          dom.appendChild(checkbox);
           dom.appendChild(contentDOM);
 
           return {
