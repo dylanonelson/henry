@@ -4,52 +4,23 @@ import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
-const cidFactory = () => {
-  let factory = null;
+import { actions as proseMirrorActions } from '../redux-modules/proseMirror';
+import { actions as checklistItemActions } from '../redux-modules/checklistItems';
+import { cidFactory, isNodeType } from '../util';
 
-  const getter = () => {
-    if (factory !== null) {
-      return factory;
-    }
-
-    let counter = 0;
-    const createCid = () => {
-      const nextId = `c${counter}`;
-      counter += 1;
-      return nextId;
-    }
-
-    factory = {
-      createCid,
-    };
-
-    return factory;
-  };
-
-  return getter();
-};
-
-function isNodeType(node, typeName) {
-  return (
-    (node &&
-    typeof typeName === 'string' &&
-    node.type.name === typeName) ||
-  false);
-}
-
-const initialize = ({ dispatchTransaction }) => {
+const initialize = ({ store }) => {
   const schema = new Schema({
     nodes: {
       checklistItem: {
         attrs: {
           itemId: {
-            default: cidFactory().createCid(),
+            default: cidFactory.createCid(),
           },
         },
         content: 'text*',
       },
       doc: {
-        content: 'checklistItem+',
+        content: 'checklistItem*',
       },
       text: {
         inline: true,
@@ -57,25 +28,33 @@ const initialize = ({ dispatchTransaction }) => {
     },
   });
 
+  function generateInitialItem() {
+    const itemId = cidFactory.createCid();
+    store.dispatch(checklistItemActions.createNew(itemId));
+    return schema.nodes.checklistItem.create({ itemId }, schema.text(' '));
+  }
+
   const state = EditorState.create({
+    doc: schema.nodes.doc.create({}, [generateInitialItem()]),
     plugins: [
       keymap(Object.assign({}, baseKeymap, {
         Enter: (...args) => {
           const [state, dispatch] = args;
-          const { $from } = state.selection;
+          const { selection, tr } = state;
+          const { $from } = selection;
           const { parent } = $from;
 
           if (isNodeType(parent, 'checklistItem') === false) {
             return baseKeymap.Enter(...args);
           }
 
-          const { selection, tr } = state;
-
           if (selection instanceof TextSelection) {
             tr.deleteSelection()
           }
 
-          const itemId = cidFactory().createCid();
+          const itemId = cidFactory.createCid();
+
+          store.dispatch(checklistItemActions.createNew(itemId));
 
           tr.split($from.pos, 1, [{
             attrs: { itemId },
@@ -113,7 +92,9 @@ const initialize = ({ dispatchTransaction }) => {
         return DecorationSet.create(state.doc, decorations);
       },
       dispatchTransaction: transaction => {
-        dispatchTransaction(transaction, view);
+        const action =
+          proseMirrorActions.dispatchTransaction(transaction, view);
+        store.dispatch(action);
       },
       nodeViews: {
         checklistItem: (node, editorView, getPos) => {
@@ -133,6 +114,14 @@ const initialize = ({ dispatchTransaction }) => {
       state,
     },
   );
+
+  store.subscribe(() => {
+    const nextState = store.getState().proseMirror.editorState;
+
+    if (nextState && view.state !== nextState) {
+      view.updateState(nextState);
+    }
+  });
 
   window.view = view;
 

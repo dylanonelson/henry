@@ -12,8 +12,6 @@ const reducerMap = {
   },
 };
 
-const initialState = {
-  editorState: {},
-};
+const initialState = {};
 
 export default handleActions(reducerMap, initialState);
