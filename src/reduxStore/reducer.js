@@ -1,7 +1,8 @@
 import { combineReducers } from 'redux';
 import reduceReducers from 'reduce-reducers';
-import checklistItems from '../redux-modules/checklistItems';
-import proseMirror from '../redux-modules/proseMirror';
+
+import checklistItems from '../reduxModules/checklistItems';
+import proseMirror from '../reduxModules/proseMirror';
 
 import rootReducer from './root';
 

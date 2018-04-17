@@ -1,4 +1,4 @@
-import createStore from '../redux-store';
+import createStore from '../reduxStore';
 
 export default () => {
   return createStore();

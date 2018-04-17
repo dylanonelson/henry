@@ -4,8 +4,8 @@ import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
-import { actions as proseMirrorActions } from '../redux-modules/proseMirror';
-import { actions as checklistItemActions } from '../redux-modules/checklistItems';
+import { actions as proseMirrorActions } from '../reduxModules/proseMirror';
+import { actions as checklistItemActions } from '../reduxModules/checklistItems';
 import { cidFactory, isNodeType } from '../util';
 
 const initialize = ({ store }) => {
