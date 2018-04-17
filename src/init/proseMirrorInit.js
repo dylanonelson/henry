@@ -1,26 +1,24 @@
-import { EditorState, TextSelection } from 'prosemirror-state';
+import { EditorState } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
-import { actions as proseMirrorActions } from '../reduxModules/proseMirror';
-import { actions as checklistItemActions } from '../reduxModules/checklistItems';
-import { cidFactory, isNodeType } from '../util';
+import { itemStatuses } from '../util';
 
-const initialize = ({ store }) => {
+const initialize = () => {
   const schema = new Schema({
     nodes: {
       checklistItem: {
         attrs: {
-          itemId: {
-            default: cidFactory.createCid(),
+          status: {
+            default: itemStatuses.ACTIVE.id,
           },
         },
         content: 'text*',
       },
       doc: {
-        content: 'checklistItem*',
+        content: 'checklistItem+',
       },
       text: {
         inline: true,
@@ -28,44 +26,9 @@ const initialize = ({ store }) => {
     },
   });
 
-  function generateInitialItem() {
-    const itemId = cidFactory.createCid();
-    store.dispatch(checklistItemActions.createNew(itemId));
-    return schema.nodes.checklistItem.create({ itemId }, schema.text(' '));
-  }
-
   const state = EditorState.create({
-    doc: schema.nodes.doc.create({}, [generateInitialItem()]),
     plugins: [
-      keymap(Object.assign({}, baseKeymap, {
-        Enter: (...args) => {
-          const [state, dispatch] = args;
-          const { selection, tr } = state;
-          const { $from } = selection;
-          const { parent } = $from;
-
-          if (isNodeType(parent, 'checklistItem') === false) {
-            return baseKeymap.Enter(...args);
-          }
-
-          if (selection instanceof TextSelection) {
-            tr.deleteSelection()
-          }
-
-          const itemId = cidFactory.createCid();
-
-          store.dispatch(checklistItemActions.createNew(itemId));
-
-          tr.split($from.pos, 1, [{
-            attrs: { itemId },
-            type: schema.nodes.checklistItem,
-          }]);
-
-          dispatch(tr);
-
-          return true;
-        },
-      })),
+      keymap(baseKeymap),
     ],
     schema,
   });
@@ -77,12 +40,69 @@ const initialize = ({ store }) => {
         let decorations = [];
         state.doc.descendants((node, pos) => {
           if (node.type.name === 'checklistItem') {
+            const currentStatus = node.attrs.status;
+
+            // Add complete checkbox
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            checkbox.checked = currentStatus === itemStatuses.COMPLETE.id
+              ? true
+              : false;
+            checkbox.disabled = currentStatus === itemStatuses.CANCELED.id;
             checkbox.classList.add('checkbox');
+            checkbox.addEventListener('change', () => {
+              const tr = state.tr;
+              const nextAttrs = Object.assign({}, node.attrs, {
+                status: checkbox.checked === false
+                  ? itemStatuses.ACTIVE.id
+                  : itemStatuses.COMPLETE.id,
+              });
+              tr.replaceWith(
+                pos,
+                pos + node.nodeSize,
+                schema.nodes.checklistItem.create(nextAttrs, node.content),
+              );
+              view.dispatch(tr);
+            }, { once: true });
 
             decorations.push(
-              new Decoration.widget(pos, checkbox)
+              Decoration.widget(pos, checkbox)
+            );
+
+            // Add activate button
+            const button = document.createElement('button');
+            button.classList.add('cancel-button');
+            switch (currentStatus) {
+              case itemStatuses.CANCELED.id: {
+                button.textContent = 'activate';
+                break;
+              }
+              case itemStatuses.ACTIVE.id: {
+                button.textContent = 'cancel';
+                break;
+              }
+              case itemStatuses.COMPLETE.id: {
+                button.style.display = 'none';
+                break;
+              }
+            }
+            button.addEventListener('click', () => {
+              const tr = state.tr;
+              const nextAttrs = Object.assign({}, node.attrs, {
+                status: currentStatus === itemStatuses.CANCELED.id
+                  ? itemStatuses.ACTIVE.id
+                  : itemStatuses.CANCELED.id,
+              });
+              tr.replaceWith(
+                pos,
+                pos + node.nodeSize,
+                schema.nodes.checklistItem.create(nextAttrs, node.content),
+              );
+              view.dispatch(tr);
+            });
+
+            decorations.push(
+              Decoration.widget(pos, button),
             );
 
             return false;
@@ -91,15 +111,11 @@ const initialize = ({ store }) => {
 
         return DecorationSet.create(state.doc, decorations);
       },
-      dispatchTransaction: transaction => {
-        const action =
-          proseMirrorActions.dispatchTransaction(transaction, view);
-        store.dispatch(action);
-      },
       nodeViews: {
         checklistItem: (node, editorView, getPos) => {
           const dom = document.createElement('div');
           dom.classList.add('checklist-item');
+          dom.classList.add(node.attrs.status.toLowerCase());
           const contentDOM = document.createElement('span');
           contentDOM.classList.add('checklist-content');
 
@@ -114,14 +130,6 @@ const initialize = ({ store }) => {
       state,
     },
   );
-
-  store.subscribe(() => {
-    const nextState = store.getState().proseMirror.editorState;
-
-    if (nextState && view.state !== nextState) {
-      view.updateState(nextState);
-    }
-  });
 
   window.view = view;
 

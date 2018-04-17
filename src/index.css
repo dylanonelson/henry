@@ -12,17 +12,31 @@ body {
 }
 
 .ProseMirror {
-  background: #eee;
 }
 
 .checkbox {
-  background: rgba(0,0,0,0.4);
-  height: 15px;
+  display: block;
   left: -25px;
   position: absolute;
-  width: 15px;
 }
 
 .checklist-item {
+  background: #eee;
   min-height: 20px;
+  margin-bottom: 5px;
+}
+
+.checklist-item.canceled {
+  text-decoration: line-through;
+}
+
+.checklist-item.complete {
+  background: rgba(10,10,240,0.5);
+  color: rgba(255,255,255,0.8);
+}
+
+.cancel-button {
+  display: block;
+  position: absolute;
+  left: calc(100% + 10px);
 }

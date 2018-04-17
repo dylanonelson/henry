@@ -1,3 +1,5 @@
+import { createEnum, defineConstant } from 'enumfactory';
+
 function createCidFactory() {
   let factory = null;
 
@@ -32,3 +34,15 @@ export function isNodeType(node, typeName) {
     node.type.name === typeName) ||
   false);
 }
+
+class Status {
+  get id() {
+    return this.name();
+  }
+}
+
+export const itemStatuses = createEnum(
+  defineConstant('ACTIVE'),
+  defineConstant('COMPLETE'),
+  defineConstant('CANCELED'),
+)(Status);
