@@ -1,5 +1,5 @@
 body {
-  background: #ccc;
+  background: #eee;
 }
 
 #editor {
@@ -21,7 +21,8 @@ body {
 }
 
 .checklist-item {
-  background: #eee;
+  background: #fff;
+  border: 1px solid #ccc;
   min-height: 20px;
   margin-bottom: 5px;
 }
@@ -35,8 +36,12 @@ body {
   color: rgba(255,255,255,0.8);
 }
 
-.cancel-button {
-  display: block;
+.item-controls {
+  display: flex;
   position: absolute;
   left: calc(100% + 10px);
+}
+
+.item-controls button {
+  display: block;
 }

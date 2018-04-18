@@ -16,6 +16,7 @@ const initialize = () => {
           },
         },
         content: 'text*',
+        draggable: true,
       },
       doc: {
         content: 'checklistItem+',
@@ -42,67 +43,57 @@ const initialize = () => {
           if (node.type.name === 'checklistItem') {
             const currentStatus = node.attrs.status;
 
-            // Add complete checkbox
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = currentStatus === itemStatuses.COMPLETE.id
-              ? true
-              : false;
-            checkbox.disabled = currentStatus === itemStatuses.CANCELED.id;
-            checkbox.classList.add('checkbox');
-            checkbox.addEventListener('change', () => {
+            const div = document.createElement('div');
+            div.classList.add('item-controls');
+            itemStatuses.values()
+              .filter(value => value.id !== currentStatus)
+              .forEach(status => {
+                const button = document.createElement('button');
+                button.classList.add(`${status.id.toLowerCase()}-button`);
+                button.dataset.statusId = status.id;
+                button.textContent = status.buttonText;
+                div.appendChild(button);
+              });
+
+            div.addEventListener('click', event => {
+              const { statusId } = event.target.dataset;
+              if (statusId === undefined || statusId === currentStatus) {
+                return;
+              }
               const tr = state.tr;
               const nextAttrs = Object.assign({}, node.attrs, {
-                status: checkbox.checked === false
-                  ? itemStatuses.ACTIVE.id
-                  : itemStatuses.COMPLETE.id,
+                status: statusId,
               });
-              tr.replaceWith(
+
+              tr.delete(
                 pos,
                 pos + node.nodeSize,
-                schema.nodes.checklistItem.create(nextAttrs, node.content),
               );
+
+              let nextPos = tr.doc.content.size;
+              let posHasBeenFound = false;
+              tr.doc.descendants((node, pos) => {
+                if (node.type.name !== 'checklistItem' || posHasBeenFound) {
+                  return;
+                }
+                const nodeStatus = itemStatuses.valueOf(node.attrs.status);
+                const nextStatus = itemStatuses.valueOf(nextAttrs.status);
+                if (nodeStatus.ordinal() >= nextStatus.ordinal()) {
+                  nextPos = pos;
+                  posHasBeenFound = true;
+                }
+              });
+
+              const nextNode =
+                schema.nodes.checklistItem.create(nextAttrs, node.content);
+
+              tr.insert(nextPos, nextNode);
+
               view.dispatch(tr);
             }, { once: true });
 
             decorations.push(
-              Decoration.widget(pos, checkbox)
-            );
-
-            // Add activate button
-            const button = document.createElement('button');
-            button.classList.add('cancel-button');
-            switch (currentStatus) {
-              case itemStatuses.CANCELED.id: {
-                button.textContent = 'activate';
-                break;
-              }
-              case itemStatuses.ACTIVE.id: {
-                button.textContent = 'cancel';
-                break;
-              }
-              case itemStatuses.COMPLETE.id: {
-                button.style.display = 'none';
-                break;
-              }
-            }
-            button.addEventListener('click', () => {
-              const tr = state.tr;
-              const nextAttrs = Object.assign({}, node.attrs, {
-                status: currentStatus === itemStatuses.CANCELED.id
-                  ? itemStatuses.ACTIVE.id
-                  : itemStatuses.CANCELED.id,
-              });
-              tr.replaceWith(
-                pos,
-                pos + node.nodeSize,
-                schema.nodes.checklistItem.create(nextAttrs, node.content),
-              );
-              view.dispatch(tr);
-            });
-
-            decorations.push(
-              Decoration.widget(pos, button),
+              Decoration.widget(pos, div),
             );
 
             return false;
