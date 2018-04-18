@@ -1,5 +1,5 @@
 import { EditorState } from 'prosemirror-state';
-import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
+import { EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
@@ -37,85 +37,78 @@ const initialize = () => {
   const view = new EditorView(
     document.querySelector('#editor'),
     {
-      decorations: state => {
-        let decorations = [];
-        state.doc.descendants((node, pos) => {
-          if (node.type.name === 'checklistItem') {
-            const currentStatus = node.attrs.status;
-
-            const icon = document.createElement('div');
-            icon.classList.add('status-icon');
-            const currentStatusObj = itemStatuses.valueOf(currentStatus);
-            icon.textContent = currentStatusObj.iconText;
-
-            decorations.push(Decoration.widget(pos, icon));
-
-            const div = document.createElement('div');
-            div.classList.add('item-controls');
-            itemStatuses.values()
-              .filter(value => value.id !== currentStatus)
-              .forEach(status => {
-                const button = document.createElement('button');
-                button.classList.add(`${status.id.toLowerCase()}-button`);
-                button.dataset.statusId = status.id;
-                button.textContent = status.buttonText;
-                div.appendChild(button);
-              });
-
-            div.addEventListener('click', event => {
-              const { statusId } = event.target.dataset;
-              if (statusId === undefined || statusId === currentStatus) {
-                return;
-              }
-              const tr = state.tr;
-              const nextAttrs = Object.assign({}, node.attrs, {
-                status: statusId,
-              });
-
-              tr.delete(
-                pos,
-                pos + node.nodeSize,
-              );
-
-              let nextPos = tr.doc.content.size;
-              let posHasBeenFound = false;
-              tr.doc.descendants((node, pos) => {
-                if (node.type.name !== 'checklistItem' || posHasBeenFound) {
-                  return;
-                }
-                const nodeStatus = itemStatuses.valueOf(node.attrs.status);
-                const nextStatus = itemStatuses.valueOf(nextAttrs.status);
-                if (nodeStatus.ordinal() >= nextStatus.ordinal()) {
-                  nextPos = pos;
-                  posHasBeenFound = true;
-                }
-              });
-
-              const nextNode =
-                schema.nodes.checklistItem.create(nextAttrs, node.content);
-
-              tr.insert(nextPos, nextNode);
-
-              view.dispatch(tr);
-            }, { once: true });
-
-            decorations.push(
-              Decoration.widget(pos, div),
-            );
-
-            return false;
-          }
-        });
-
-        return DecorationSet.create(state.doc, decorations);
-      },
       nodeViews: {
         checklistItem: (node, editorView, getPos) => {
           const dom = document.createElement('div');
           dom.classList.add('checklist-item');
           dom.classList.add(node.attrs.status.toLowerCase());
+
+          const currentStatus = node.attrs.status;
+
+          const icon = document.createElement('div');
+          icon.classList.add('status-icon');
+          const currentStatusObj = itemStatuses.valueOf(currentStatus);
+          icon.textContent = currentStatusObj.iconText;
+          icon.contentEditable = false;
+
+          const controls = document.createElement('div');
+          controls.classList.add('item-controls');
+          itemStatuses.values()
+            .filter(value => value.id !== currentStatus)
+            .forEach(status => {
+              const button = document.createElement('button');
+              button.classList.add(`${status.id.toLowerCase()}-button`);
+              button.dataset.statusId = status.id;
+              button.textContent = status.buttonText;
+              controls.appendChild(button);
+            });
+
+          controls.contentEditable = false;
+          controls.addEventListener('click', event => {
+            const { statusId } = event.target.dataset;
+            if (statusId === undefined || statusId === currentStatus) {
+              return;
+            }
+            const tr = editorView.state.tr;
+            const nextAttrs = Object.assign({}, node.attrs, {
+              status: statusId,
+            });
+
+            const pos = getPos();
+            const currentNode = editorView.state.doc.resolve(pos).nodeAfter;
+
+            tr.delete(
+              pos,
+              pos + currentNode.nodeSize,
+            );
+
+            let nextPos = tr.doc.content.size;
+            let posHasBeenFound = false;
+            tr.doc.descendants((node, pos) => {
+              if (node.type.name !== 'checklistItem' || posHasBeenFound) {
+                return;
+              }
+              const nodeStatus = itemStatuses.valueOf(node.attrs.status);
+              const nextStatus = itemStatuses.valueOf(nextAttrs.status);
+              if (nodeStatus.ordinal() >= nextStatus.ordinal()) {
+                nextPos = pos;
+                posHasBeenFound = true;
+              }
+            });
+
+            const nextNode =
+              schema.nodes.checklistItem.create(nextAttrs, currentNode.content);
+
+            tr.insert(nextPos, nextNode);
+
+            editorView.dispatch(tr);
+          }, { once: true });
+
+          dom.appendChild(icon);
+          dom.appendChild(controls);
+
           const contentDOM = document.createElement('span');
-          contentDOM.classList.add('checklist-content');
+          contentDOM.classList.add('checklist-item-content');
 
           dom.appendChild(contentDOM);
 

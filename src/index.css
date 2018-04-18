@@ -15,7 +15,8 @@ body {
   min-height: 150px;
 }
 
-.ProseMirror {
+.ProseMirror:focus {
+  outline: none;
 }
 
 .checklist-item, .status-icon, .item-controls {
