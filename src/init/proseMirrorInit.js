@@ -43,6 +43,13 @@ const initialize = () => {
           if (node.type.name === 'checklistItem') {
             const currentStatus = node.attrs.status;
 
+            const icon = document.createElement('div');
+            icon.classList.add('status-icon');
+            const currentStatusObj = itemStatuses.valueOf(currentStatus);
+            icon.textContent = currentStatusObj.iconText;
+
+            decorations.push(Decoration.widget(pos, icon));
+
             const div = document.createElement('div');
             div.classList.add('item-controls');
             itemStatuses.values()

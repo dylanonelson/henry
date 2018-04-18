@@ -36,8 +36,9 @@ export function isNodeType(node, typeName) {
 }
 
 class Status {
-  constructor({ buttonText }) {
+  constructor({ buttonText, iconText }) {
     this.buttonText = buttonText;
+    this.iconText = iconText;
   }
 
   get id() {
@@ -46,7 +47,7 @@ class Status {
 }
 
 export const itemStatuses = createEnum(
-  defineConstant('ACTIVE', { buttonText: 'activate' }),
-  defineConstant('COMPLETE', { buttonText: 'complete' }),
-  defineConstant('CANCELED', { buttonText: 'cancel' }),
+  defineConstant('ACTIVE', { buttonText: 'activate', iconText: '👉' }),
+  defineConstant('COMPLETE', { buttonText: 'complete', iconText: '✔️' }),
+  defineConstant('CANCELED', { buttonText: 'cancel', iconText: '❌' }),
 )(Status);

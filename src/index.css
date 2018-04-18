@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: #eee;
 }
@@ -14,10 +18,10 @@ body {
 .ProseMirror {
 }
 
-.checkbox {
-  display: block;
-  left: -25px;
-  position: absolute;
+.checklist-item, .status-icon, .item-controls {
+  height: 20px;
+  line-height: 20px;
+  font-size: 16px;
 }
 
 .checklist-item {
@@ -36,8 +40,16 @@ body {
   color: rgba(255,255,255,0.8);
 }
 
+.status-icon {
+  display: block;
+  font-size: 20px;
+  left: -30px;
+  position: absolute;
+}
+
 .item-controls {
   display: flex;
+  align-items: center;
   position: absolute;
   left: calc(100% + 10px);
 }
