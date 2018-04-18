@@ -1,9 +1,14 @@
 * {
+  background: none;
   box-sizing: border-box;
+  font: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   background: #eee;
+  font-family: monospace;
 }
 
 #editor {
@@ -11,7 +16,7 @@ body {
   position: relative;
   margin: auto;
   margin-top: 25%;
-  max-width: 550px;
+  max-width: 450px;
   min-height: 150px;
 }
 
@@ -25,11 +30,25 @@ body {
   font-size: 16px;
 }
 
-.checklist-item {
-  background: #fff;
+.title {
+  border-bottom: 1px solid #ccc;
+  font-size: 36px;
+  margin-bottom: 25px;
+}
+
+.notes {
   border: 1px solid #ccc;
+  min-height: 150px;
+}
+
+.checklist {
+  margin-bottom: 25px;
+}
+
+.checklist-item {
+  border-bottom: 1px solid #ccc;
   min-height: 20px;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
 }
 
 .checklist-item.canceled {
@@ -50,6 +69,7 @@ body {
 
 .item-controls {
   display: flex;
+  font-size: 12px;
   align-items: center;
   position: absolute;
   left: calc(100% + 10px);
@@ -57,4 +77,5 @@ body {
 
 .item-controls button {
   display: block;
+  padding: 2px 4px;
 }

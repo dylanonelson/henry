@@ -9,6 +9,18 @@ import { itemStatuses } from '../util';
 const initialize = () => {
   const schema = new Schema({
     nodes: {
+      checklist: {
+        content: 'checklistItem+',
+        toDOM(node) {
+          return [
+            'div',
+            {
+              'class': 'checklist',
+            },
+            0,
+          ];
+        },
+      },
       checklistItem: {
         attrs: {
           status: {
@@ -19,10 +31,46 @@ const initialize = () => {
         draggable: true,
       },
       doc: {
-        content: 'checklistItem+',
+        content: 'title checklist notes',
+      },
+      notes: {
+        content: 'paragraph+',
+        toDOM(node) {
+          return [
+            'div',
+            {
+              'class': 'notes',
+            },
+            0,
+          ];
+        },
+      },
+      paragraph: {
+        content: 'text*',
+        toDOM(node) {
+          return [
+            'p',
+            {
+              'class': 'paragraph',
+            },
+            0,
+          ];
+        },
       },
       text: {
         inline: true,
+      },
+      title: {
+        content: 'text*',
+        toDOM(node) {
+          return [
+            'h2',
+            {
+              'class': 'title',
+            },
+            0,
+          ];
+        },
       },
     },
   });
@@ -82,12 +130,15 @@ const initialize = () => {
               pos + currentNode.nodeSize,
             );
 
-            let nextPos = tr.doc.content.size;
+            let lastPos = null;
+            let nextPos = null;
             let posHasBeenFound = false;
             tr.doc.descendants((node, pos) => {
               if (node.type.name !== 'checklistItem' || posHasBeenFound) {
                 return;
               }
+              // The end of the current item
+              lastPos = pos + node.nodeSize;
               const nodeStatus = itemStatuses.valueOf(node.attrs.status);
               const nextStatus = itemStatuses.valueOf(nextAttrs.status);
               if (nodeStatus.ordinal() >= nextStatus.ordinal()) {
@@ -99,7 +150,7 @@ const initialize = () => {
             const nextNode =
               schema.nodes.checklistItem.create(nextAttrs, currentNode.content);
 
-            tr.insert(nextPos, nextNode);
+            tr.insert(nextPos || lastPos, nextNode);
 
             editorView.dispatch(tr);
           }, { once: true });
