@@ -6,8 +6,6 @@ import { keymap } from 'prosemirror-keymap';
 
 import { itemStatuses } from '../util';
 
-const SELECTED_NODE_CLASS = 'selected';
-
 const initialize = () => {
   const schema = new Schema({
     nodes: {
@@ -31,6 +29,7 @@ const initialize = () => {
         },
         content: 'text*',
         draggable: true,
+        placeholder: 'New item...',
       },
       doc: {
         content: 'title checklist',
@@ -40,6 +39,7 @@ const initialize = () => {
       },
       title: {
         content: 'text*',
+        placeholder: 'Title',
         toDOM(node) {
           return [
             'h2',
@@ -56,6 +56,7 @@ const initialize = () => {
   const state = EditorState.create({
     plugins: [
       keymap(baseKeymap),
+      // Add [selected=true]
       new Plugin({
         props: {
           decorations: state => {
@@ -68,6 +69,35 @@ const initialize = () => {
                 Decoration.node($pos.start() - 1, $pos.end() + 1, { selected: true }),
               ];
             }
+
+            return DecorationSet.create(doc, decorations);
+          },
+        },
+      }),
+      // Add [data-placeholder]
+      new Plugin({
+        props: {
+          decorations: state => {
+            let decorations = [];
+            const { doc } = state;
+            doc.descendants((node, pos, parent) => {
+              const $pos = doc.resolve(pos);
+              if (
+                node.isTextblock &&
+                $pos.parentOffset === 0 &&
+                node.content.size === 0 && (
+                  // Either this is the last child, or the child after it
+                  // is of a different type
+                  parent.lastChild.eq(node) ||
+                  parent.childAfter(pos + node.nodeSize).node.type !== node.type
+                )
+              ) {
+                decorations.push(Decoration.node(pos, pos + node.nodeSize, {
+                  'data-placeholder': node.type.spec.placeholder,
+                }));
+              }
+            });
+
             return DecorationSet.create(doc, decorations);
           },
         },
@@ -152,13 +182,7 @@ const initialize = () => {
 
           return {
             contentDOM,
-            deselectNode() {
-              dom.classList.remove(SELECTED_NODE_CLASS);
-            },
             dom,
-            selectNode() {
-              dom.classList.add(SELECTED_NODE_CLASS);
-            },
           };
         },
       },

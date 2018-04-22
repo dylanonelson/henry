@@ -31,6 +31,19 @@ body {
   outline: none;
 }
 
+h2[data-placeholder]:not([selected]):before {
+  content: attr(data-placeholder);
+  cursor: text;
+  opacity: 0.6;
+}
+
+.checklist-item[data-placeholder]:not([selected]):before {
+  content: attr(data-placeholder);
+  cursor: text;
+  opacity: 0.6;
+  position: absolute;
+}
+
 .checklist-item, .status-icon, .item-controls {
   line-height: 20px;
   font-size: 16px;
