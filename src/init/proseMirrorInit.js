@@ -1,4 +1,4 @@
-import { EditorState, Plugin } from 'prosemirror-state';
+import { EditorState, Plugin, Selection } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
@@ -6,6 +6,10 @@ import { keymap } from 'prosemirror-keymap';
 
 import * as persistence from '../persistence';
 import { itemStatuses } from '../util';
+
+function isNodeType(node, typeName) {
+  return node.type.name === typeName;
+}
 
 const initialize = () => {
   const schema = new Schema({
@@ -55,7 +59,60 @@ const initialize = () => {
   });
 
   const plugins = [
-    keymap(baseKeymap),
+    keymap(Object.assign({}, baseKeymap, {
+      Enter: (...args) => {
+        const [state, dispatch] = args;
+        const { selection, tr } = state;
+
+        const currentNode = selection.$from.parent;
+
+        if (isNodeType(currentNode, 'checklistItem')) {
+
+          if (selection.empty === false) {
+            tr.deleteSelection();
+          }
+
+          tr.split(selection.from, 1, [{
+            attrs: currentNode.attrs,
+            type: schema.nodes.checklistItem,
+          }]);
+
+          const pos = selection.from;
+          const $pos = tr.doc.resolve(pos);
+          // This will be the first node that we split
+          const node = $pos.parent;
+
+          // If it is the first item & it's empty, make it active
+          if ($pos.index($pos.depth - 1) === 0 && node.content.size === 0) {
+            tr.replaceWith(
+              pos - 1,
+              pos + 1,
+              schema.nodes.checklistItem.create(),
+            );
+          }
+
+          return dispatch(tr);
+        }
+
+        if (isNodeType(currentNode, 'title')) {
+          const pos = selection.from;
+          const $pos = tr.doc.resolve(pos);
+
+          if (selection.empty && pos === $pos.end()) {
+            // Add 2: 1 to leave title node and 1 to enter checklist node
+            const nextPos = pos + 2;
+            tr.insert(nextPos, schema.nodes.checklistItem.create());
+            // Set selection inside new checklist item
+            const $nextPos = tr.doc.resolve(nextPos);
+            tr.setSelection(Selection.findFrom($nextPos, 1));
+          }
+
+          return dispatch(tr);
+        }
+
+        return baseKeymap.Enter(...args);
+      },
+    })),
     // Add [selected=true]
     new Plugin({
       props: {
