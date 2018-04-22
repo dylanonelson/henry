@@ -88,8 +88,8 @@ h2[data-placeholder]:before {
 }
 
 .checklist-item.COMPLETE .checklist-item-content {
+  color: #16621B;
   left: 35px;
-  opacity: 0.5;
   position: relative;
 }
 
