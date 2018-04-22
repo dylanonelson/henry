@@ -23,9 +23,17 @@ body {
   margin: auto;
   margin-bottom: 50px;
   margin-top: 50px;
-  max-width: 400px;
+  max-width: 450px;
   min-height: 600px;
   width: 100%;
+}
+
+@media (max-width: 450px) {
+  #editor {
+    margin-bottom: 0;
+    margin-top: 0;
+    min-height: 100vh;
+  }
 }
 
 .ProseMirror:focus {
