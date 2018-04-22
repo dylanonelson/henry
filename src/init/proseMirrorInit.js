@@ -177,8 +177,15 @@ const initialize = () => {
 
           const dom = document.createElement('div');
           dom.classList.add('checklist-item');
+          dom.classList.add('data-status', currentStatus.id);
           dom.appendChild(controls);
           dom.appendChild(contentDOM);
+
+          if (currentStatus !== itemStatuses.ACTIVE) {
+            dom.prepend(
+              new (customElements.get('current-status-icon'))(currentStatus)
+            );
+          }
 
           return {
             contentDOM,

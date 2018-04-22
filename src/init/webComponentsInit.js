@@ -25,5 +25,16 @@ export default () => {
     }
   });
 
+  customElements.define('current-status-icon', class extends HTMLElement {
+    constructor(status) {
+      super();
+      this.status = status;
+    }
+    connectedCallback() {
+      fromTemplate.call(this, '.current-status-icon-tpl');
+      this.querySelector('i').textContent = this.status.icon;
+    }
+  });
+
   componentsDefined = true;
 };
