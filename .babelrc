@@ -1,5 +1,12 @@
 {
-  "presets": ["react", "env"],
+  "presets": [
+    "react",
+    ["env", {
+      "targets": {
+        "browsers": ["last 1 versions"]
+      }
+    }]
+  ],
   "plugins": [
     ["transform-decorators-legacy"]
   ]

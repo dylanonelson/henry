@@ -1,23 +1,30 @@
 * {
   background: none;
+  border: 0;
+  box-shadow: none;
   box-sizing: border-box;
   font: inherit;
   margin: 0;
+  outline: 0;
   padding: 0;
 }
 
 body {
   background: #eee;
-  font-family: monospace;
+  font-family: 'Roboto Slab';
 }
 
 #editor {
-  background: transparent;
+  background: #fff;
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0px 1px 6px,
+    rgba(0, 0, 0, 0.12) 0px 1px 4px;
   position: relative;
   margin: auto;
-  margin-top: 25%;
-  max-width: 450px;
-  min-height: 150px;
+  margin-top: 50px;
+  max-width: 400px;
+  min-height: 600px;
+  width: 100%;
 }
 
 .ProseMirror:focus {
@@ -25,20 +32,14 @@ body {
 }
 
 .checklist-item, .status-icon, .item-controls {
-  height: 20px;
   line-height: 20px;
   font-size: 16px;
 }
 
 .title {
-  border-bottom: 1px solid #ccc;
   font-size: 36px;
-  margin-bottom: 25px;
-}
-
-.notes {
-  border: 1px solid #ccc;
-  min-height: 150px;
+  margin-bottom: 10px;
+  padding: 20px 20px;
 }
 
 .checklist {
@@ -46,18 +47,27 @@ body {
 }
 
 .checklist-item {
-  border-bottom: 1px solid #ccc;
   min-height: 20px;
   margin-bottom: 15px;
+  padding: 10px 20px 10px 20px;;
+  width: calc(100% - 75px);
 }
 
-.checklist-item.canceled {
+.checklist-item[selected=true] {
+  padding-left: 18px;
+  border-left: 2px solid #16621B;
+}
+
+.checklist-item.active div {
+}
+
+.checklist-item.canceled div {
+  opacity: 0.5;
   text-decoration: line-through;
 }
 
-.checklist-item.complete {
-  background: rgba(10,10,240,0.5);
-  color: rgba(255,255,255,0.8);
+.checklist-item.complete div {
+  opacity: 0.5;
 }
 
 .status-icon {
@@ -72,10 +82,11 @@ body {
   font-size: 12px;
   align-items: center;
   position: absolute;
-  left: calc(100% + 10px);
+  right: 15px;
 }
 
 .item-controls button {
+  cursor: pointer;
   display: block;
   padding: 2px 4px;
 }

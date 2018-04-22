@@ -1,10 +1,12 @@
-import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, Plugin } from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
 import { itemStatuses } from '../util';
+
+const SELECTED_NODE_CLASS = 'selected';
 
 const initialize = () => {
   const schema = new Schema({
@@ -31,31 +33,7 @@ const initialize = () => {
         draggable: true,
       },
       doc: {
-        content: 'title checklist notes',
-      },
-      notes: {
-        content: 'paragraph+',
-        toDOM(node) {
-          return [
-            'div',
-            {
-              'class': 'notes',
-            },
-            0,
-          ];
-        },
-      },
-      paragraph: {
-        content: 'text*',
-        toDOM(node) {
-          return [
-            'p',
-            {
-              'class': 'paragraph',
-            },
-            0,
-          ];
-        },
+        content: 'title checklist',
       },
       text: {
         inline: true,
@@ -78,6 +56,22 @@ const initialize = () => {
   const state = EditorState.create({
     plugins: [
       keymap(baseKeymap),
+      new Plugin({
+        props: {
+          decorations: state => {
+            let decorations = []
+            const { doc, selection } = state;
+
+            if (selection.empty && selection.anchor !== 0) {
+              const $pos = doc.resolve(selection.anchor);
+              decorations = [
+                Decoration.node($pos.start() - 1, $pos.end() + 1, { selected: true }),
+              ];
+            }
+            return DecorationSet.create(doc, decorations);
+          },
+        },
+      }),
     ],
     schema,
   });
@@ -86,35 +80,27 @@ const initialize = () => {
     document.querySelector('#editor'),
     {
       nodeViews: {
-        checklistItem: (node, editorView, getPos) => {
-          const dom = document.createElement('div');
-          dom.classList.add('checklist-item');
-          dom.classList.add(node.attrs.status.toLowerCase());
-
-          const currentStatus = node.attrs.status;
-
-          const icon = document.createElement('div');
-          icon.classList.add('status-icon');
-          const currentStatusObj = itemStatuses.valueOf(currentStatus);
-          icon.textContent = currentStatusObj.iconText;
-          icon.contentEditable = false;
+        checklistItem: (node, editorView, getPos, decorations) => {
+          const currentStatus = itemStatuses.valueOf(node.attrs.status);
 
           const controls = document.createElement('div');
           controls.classList.add('item-controls');
-          itemStatuses.values()
-            .filter(value => value.id !== currentStatus)
-            .forEach(status => {
-              const button = document.createElement('button');
-              button.classList.add(`${status.id.toLowerCase()}-button`);
-              button.dataset.statusId = status.id;
-              button.textContent = status.buttonText;
-              controls.appendChild(button);
-            });
+          if (currentStatus === itemStatuses.ACTIVE) {
+            itemStatuses.values()
+              .filter(value => value !== currentStatus)
+              .forEach(status => {
+                const button = new (customElements.get('icon-btn'))(status);
+                controls.appendChild(button);
+              });
+          } else {
+            controls.appendChild(
+              new (customElements.get('icon-btn'))(itemStatuses.ACTIVE)
+            );
+          }
 
-          controls.contentEditable = false;
           controls.addEventListener('click', event => {
             const { statusId } = event.target.dataset;
-            if (statusId === undefined || statusId === currentStatus) {
+            if (statusId === undefined || statusId === currentStatus.id) {
               return;
             }
             const tr = editorView.state.tr;
@@ -155,17 +141,24 @@ const initialize = () => {
             editorView.dispatch(tr);
           }, { once: true });
 
-          dom.appendChild(icon);
-          dom.appendChild(controls);
 
-          const contentDOM = document.createElement('span');
+          const contentDOM = document.createElement('div');
           contentDOM.classList.add('checklist-item-content');
 
+          const dom = document.createElement('div');
+          dom.classList.add('checklist-item');
+          dom.appendChild(controls);
           dom.appendChild(contentDOM);
 
           return {
             contentDOM,
+            deselectNode() {
+              dom.classList.remove(SELECTED_NODE_CLASS);
+            },
             dom,
+            selectNode() {
+              dom.classList.add(SELECTED_NODE_CLASS);
+            },
           };
         },
       },
