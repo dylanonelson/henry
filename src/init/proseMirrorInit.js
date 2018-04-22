@@ -4,6 +4,7 @@ import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 
+import * as persistence from '../persistence';
 import { itemStatuses } from '../util';
 
 const initialize = () => {
@@ -53,56 +54,58 @@ const initialize = () => {
     },
   });
 
-  const state = EditorState.create({
-    plugins: [
-      keymap(baseKeymap),
-      // Add [selected=true]
-      new Plugin({
-        props: {
-          decorations: state => {
-            let decorations = []
-            const { doc, selection } = state;
+  const plugins = [
+    keymap(baseKeymap),
+    // Add [selected=true]
+    new Plugin({
+      props: {
+        decorations: state => {
+          let decorations = []
+          const { doc, selection } = state;
 
-            if (selection.empty && selection.anchor !== 0) {
-              const $pos = doc.resolve(selection.anchor);
-              decorations = [
-                Decoration.node($pos.start() - 1, $pos.end() + 1, { selected: true }),
-              ];
+          if (selection.empty && selection.anchor !== 0) {
+            const $pos = doc.resolve(selection.anchor);
+            decorations = [
+              Decoration.node($pos.start() - 1, $pos.end() + 1, { selected: true }),
+            ];
+          }
+
+          return DecorationSet.create(doc, decorations);
+        },
+      },
+    }),
+    // Add [data-placeholder]
+    new Plugin({
+      props: {
+        decorations: state => {
+          let decorations = [];
+          const { doc } = state;
+          doc.descendants((node, pos, parent) => {
+            const $pos = doc.resolve(pos);
+            if (
+              node.isTextblock &&
+              $pos.parentOffset === 0 &&
+              node.content.size === 0 && (
+                // Either this is the last child, or the child after it
+                // is of a different type
+                parent.lastChild.eq(node) ||
+                parent.childAfter(pos + node.nodeSize).node.type !== node.type
+              )
+            ) {
+              decorations.push(Decoration.node(pos, pos + node.nodeSize, {
+                'data-placeholder': node.type.spec.placeholder,
+              }));
             }
+          });
 
-            return DecorationSet.create(doc, decorations);
-          },
+          return DecorationSet.create(doc, decorations);
         },
-      }),
-      // Add [data-placeholder]
-      new Plugin({
-        props: {
-          decorations: state => {
-            let decorations = [];
-            const { doc } = state;
-            doc.descendants((node, pos, parent) => {
-              const $pos = doc.resolve(pos);
-              if (
-                node.isTextblock &&
-                $pos.parentOffset === 0 &&
-                node.content.size === 0 && (
-                  // Either this is the last child, or the child after it
-                  // is of a different type
-                  parent.lastChild.eq(node) ||
-                  parent.childAfter(pos + node.nodeSize).node.type !== node.type
-                )
-              ) {
-                decorations.push(Decoration.node(pos, pos + node.nodeSize, {
-                  'data-placeholder': node.type.spec.placeholder,
-                }));
-              }
-            });
+      },
+    }),
+  ];
 
-            return DecorationSet.create(doc, decorations);
-          },
-        },
-      }),
-    ],
+  const state = EditorState.create({
+    plugins,
     schema,
   });
 
@@ -196,6 +199,30 @@ const initialize = () => {
       state,
     },
   );
+
+  persistence.readCurrentDocument(result => {
+    let documentId;
+
+    if (result === null) {
+      documentId = persistence.writeNewDocument(view.state.toJSON())[0];
+      persistence.writeCurrentDocument(documentId);
+    } else {
+      documentId = result[0];
+      const doc = result[1].editorState;
+      view.updateState(EditorState.fromJSON({
+        plugins,
+        schema,
+      }, doc));
+    }
+
+    view.setProps({
+      dispatchTransaction(transaction) {
+        const nextState = view.state.apply(transaction);
+        view.updateState(nextState);
+        persistence.writeExistingDocument(documentId, view.state.toJSON());
+      },
+    });
+  });
 
   window.view = view;
 
