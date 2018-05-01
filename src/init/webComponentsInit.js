@@ -12,11 +12,14 @@ export default () => {
     constructor(status) {
       super();
       this.status = status;
-      this.addEventListener('click', this.click, { once: true });
+      this.addEventListener('click', this.click);
     }
     connectedCallback() {
       fromTemplate.call(this, '.icon-btn-tpl');
       this.querySelector('i').textContent = this.status.icon;
+    }
+    disconnectedCallback() {
+      this.removeEventListener('click', this.click);
     }
     get dataset() {
       return {

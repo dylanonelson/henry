@@ -205,7 +205,7 @@ function buildNodeViews() {
         );
       }
 
-      controls.addEventListener('click', event => {
+      const handler = event => {
         const { statusId } = event.target.dataset;
         if (statusId === undefined || statusId === currentStatus.id) {
           return;
@@ -246,8 +246,9 @@ function buildNodeViews() {
         tr.insert(nextPos || lastPos, nextNode);
 
         editorView.dispatch(tr);
-      }, { once: true });
+      };
 
+      controls.addEventListener('click', handler);
 
       const contentDOM = document.createElement('div');
       contentDOM.classList.add('checklist-item-content');
@@ -266,6 +267,9 @@ function buildNodeViews() {
 
       return {
         contentDOM,
+        destroy() {
+          controls.removeEventListener('click', handler);
+        },
         dom,
       };
     },
