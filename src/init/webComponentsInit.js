@@ -36,5 +36,48 @@ export default () => {
     }
   });
 
+  customElements.define('dropdown-menu', class extends HTMLElement {
+    static get observedAttributes() {
+      return ['open'];
+    }
+
+    attributeChangedCallback(name, prev, next) {
+      this.menu.style.display = this.getAttribute('open') === 'true'
+        ? 'block'
+        : 'none';
+    }
+
+    close() {
+      this.setAttribute('open', false);
+    }
+
+    connectedCallback() {
+      fromTemplate.call(this, '.dropdown-tpl');
+
+      this.menu = this.querySelector('.dropdown-menu');
+      this.button = this.querySelector('.dropdown-btn');
+
+      this.menu.style.display = 'none';
+
+      this.button.addEventListener('click', () => {
+        this.setAttribute('open', true);
+      });
+
+      this.addEventListener('click', event => {
+        event.fromDropdownMenu = true;
+        const { target } = event;
+        if (target.tagName.toLowerCase() === 'li') {
+          this.dispatchEvent(new Event(target.id));
+        }
+      });
+
+      document.addEventListener('click', event => {
+        if (event.fromDropdownMenu !== true) {
+          this.setAttribute('open', false);
+        }
+      });
+    }
+  });
+
   componentsDefined = true;
 };

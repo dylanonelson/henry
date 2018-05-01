@@ -45,16 +45,27 @@ export function writeNewDocument(editorState) {
 }
 
 export function writeExistingDocument(documentId, editorState) {
-  const ref = getUserDocumentsRef();
+  const ref = getUserDocumentsRef(documentId);
   const ts = Date.now();
-  ref.update({
-    [documentId]: {
-      editorState,
-      ts,
-    },
-  });
+  ref.update({ editorState, ts });
 }
 
 export function writeCurrentDocument(documentId) {
   getCurrentDocumentRef().set(documentId);
+}
+
+function getSnapshotsRef(documentId) {
+  return firebase.database()
+    .ref(`${getUserUid()}/documents/${documentId}/snapshots`)
+}
+
+export function writeSnapshot(documentId, document) {
+  const ref = getSnapshotsRef(documentId);
+  const key = ref.push().key;
+  const ts = Date.now();
+  const data = {
+    [key]: { document, ts },
+  };
+  ref.update(data);
+  return [key, data];
 }

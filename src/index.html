@@ -6,7 +6,23 @@
   <meta name="viewport" content="width=device-width">
 </head>
 <body>
-  <div id="editor"></div>
+
+  <div id="app">
+    <div id="dropdown"></div>
+    <div id="editor"></div>
+  </div>
+
+  <template class="dropdown-tpl">
+    <div class="dropdown-btn">
+      <i class="material-icons">more_vert</i>
+    </div>
+    <div class="dropdown-menu">
+      <ol>
+        <li id="new-snapshot">New snapshot</li>
+        <li id="sign-out">Sign out</li>
+      </ol>
+    </div>
+  </template>
 
   <template class="icon-btn-tpl">
     <button contentEditable="false">

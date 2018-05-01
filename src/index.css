@@ -9,9 +9,51 @@
   padding: 0;
 }
 
+ol {
+  list-style-type: none;
+}
+
 body {
   background: #eee;
   font-family: 'Roboto Slab';
+}
+
+#app {
+  margin: auto;
+  margin-bottom: 50px;
+  margin-top: 50px;
+  max-width: 450px;
+  position: relative;
+  width: 100%;
+}
+
+dropdown-menu {
+  position: absolute;
+  z-index: 1;
+  top: 35px;
+  right: 15px;
+}
+
+dropdown-menu ol {
+  background: #fff;
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0px 1px 6px,
+    rgba(0, 0, 0, 0.12) 0px 1px 4px;
+  position: absolute;
+  right: 0;
+  width: 200px;
+}
+
+dropdown-menu {
+  cursor: pointer;
+}
+
+dropdown-menu li {
+  padding: 10px 10px;
+}
+
+dropdown-menu li:hover {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #editor {
@@ -19,17 +61,13 @@ body {
   box-shadow:
     rgba(0, 0, 0, 0.12) 0px 1px 6px,
     rgba(0, 0, 0, 0.12) 0px 1px 4px;
-  position: relative;
-  margin: auto;
-  margin-bottom: 50px;
-  margin-top: 50px;
-  max-width: 450px;
   min-height: 600px;
+  position: relative;
   width: 100%;
 }
 
 @media (max-width: 450px) {
-  #editor {
+  #app {
     margin-bottom: 0;
     margin-top: 0;
     min-height: 100vh;
@@ -62,6 +100,7 @@ h2[data-placeholder]:before {
 .title {
   font-size: 24px;
   padding: 30px 20px 20px 20px;
+  width: calc(100% - 50px);
 }
 
 .checklist {
