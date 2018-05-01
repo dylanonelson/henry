@@ -149,13 +149,16 @@ export function buildPlugins() {
           doc.descendants((node, pos, parent) => {
             const $pos = doc.resolve(pos);
             if (
+              // It's a node that contains text
               node.isTextblock &&
+              // It's the first child of its parent
               $pos.parentOffset === 0 &&
+              // It's empty
               node.content.size === 0 && (
-                // Either this is the last child, or the child after it
-                // is of a different type
-                parent.lastChild.eq(node) ||
-                parent.childAfter(pos + node.nodeSize).node.type !== node.type
+                // It is the last child of its parent
+                parent.content.size === node.nodeSize ||
+                // The child after it is of a different type
+                parent.childAfter($pos.index($pos.depth) + node.nodeSize).node.type !== node.type
               )
             ) {
               decorations.push(Decoration.node(pos, pos + node.nodeSize, {
