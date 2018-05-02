@@ -4,6 +4,7 @@
   "scripts": {
     "build": "webpack --colors --progress",
     "build:prd": "NODE_ENV=production npm run build",
+    "deploy": "npm run build:prd && firebase deploy",
     "dev": "webpack-dev-server",
     "watch": "npm run build -- --watch"
   },
