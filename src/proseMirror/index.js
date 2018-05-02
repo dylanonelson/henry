@@ -186,6 +186,8 @@ function buildEditorState() {
 }
 
 function buildNodeViews() {
+  const IconBtn = customElements.get('icon-btn');
+
   const nodeViews = {
     checklistItem: (node, editorView, getPos) => {
       const currentStatus = itemStatuses.valueOf(node.attrs.status);
@@ -193,23 +195,36 @@ function buildNodeViews() {
       const controls = document.createElement('div');
       controls.classList.add('item-controls');
       if (currentStatus === itemStatuses.ACTIVE) {
-        itemStatuses.values()
-          .filter(value => value !== currentStatus)
-          .forEach(status => {
-            const button = new (customElements.get('icon-btn'))(status);
-            controls.appendChild(button);
-          });
-      } else {
-        controls.appendChild(
-          new (customElements.get('icon-btn'))(itemStatuses.ACTIVE)
-        );
+        [
+          itemStatuses.CANCELED,
+          itemStatuses.DEFERRED,
+        ].forEach(status => {
+          const button = new IconBtn(status);
+          controls.appendChild(button);
+        });
       }
 
+      const toggle = document.createElement('div');
+      toggle.contentEditable = false;
+      toggle.classList.add('current-status-icon');
+      let toggleBtn;
+      if (currentStatus === itemStatuses.ACTIVE) {
+        toggleBtn = new IconBtn(currentStatus, itemStatuses.COMPLETE);
+      } else {
+        toggleBtn = new IconBtn(currentStatus);
+      }
+      toggle.appendChild(toggleBtn);
+
       const handler = event => {
-        const { statusId } = event.target.dataset;
-        if (statusId === undefined || statusId === currentStatus.id) {
+        let { statusId } = event.target.dataset;
+
+        if (statusId === undefined) {
           return;
         }
+        if (statusId === currentStatus.id) {
+          statusId = itemStatuses.ACTIVE.id;
+        }
+
         const tr = editorView.state.tr;
         const nextAttrs = Object.assign({}, node.attrs, {
           status: statusId,
@@ -249,6 +264,7 @@ function buildNodeViews() {
       };
 
       controls.addEventListener('click', handler);
+      toggleBtn.addEventListener('click', handler);
 
       const contentDOM = document.createElement('div');
       contentDOM.classList.add('checklist-item-content');
@@ -256,19 +272,15 @@ function buildNodeViews() {
       const dom = document.createElement('div');
       dom.classList.add('checklist-item');
       dom.classList.add('data-status', currentStatus.id);
+      dom.appendChild(toggle);
       dom.appendChild(controls);
       dom.appendChild(contentDOM);
-
-      if (currentStatus !== itemStatuses.ACTIVE) {
-        dom.prepend(
-          new (customElements.get('current-status-icon'))(currentStatus)
-        );
-      }
 
       return {
         contentDOM,
         destroy() {
           controls.removeEventListener('click', handler);
+          toggleBtn.addEventListener('click', handler);
         },
         dom,
       };
@@ -327,9 +339,16 @@ export function filterInactiveItems() {
       return;
     }
 
-    if (node.attrs.status !== itemStatuses.ACTIVE.id) {
+    if (node.attrs.status !== itemStatuses.ACTIVE.id && node.attrs.status !== itemStatuses.DEFERRED.id) {
       const deleteAt = tr.mapping.map(pos);
       tr.delete(deleteAt, deleteAt + node.nodeSize);
+    } else if (node.attrs.status === itemStatuses.DEFERRED.id) {
+      const replaceAt = tr.mapping.map(pos);
+      const nextNode = state.schema.nodes.checklistItem.create(
+        { status: itemStatuses.ACTIVE.id },
+        node.content
+      );
+      tr.replaceWith(replaceAt, replaceAt + node.nodeSize, nextNode);
     }
   });
 

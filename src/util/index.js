@@ -48,7 +48,20 @@ class Status {
 }
 
 export const itemStatuses = createEnum(
-  defineConstant('ACTIVE', { buttonText: 'activate', icon: 'undo' }),
-  defineConstant('COMPLETE', { buttonText: 'complete', icon: 'done' }),
-  defineConstant('CANCELED', { buttonText: 'cancel', icon: 'close' }),
+  defineConstant('ACTIVE', {
+    icon: 'crop_square',
+    text: 'activate',
+  }),
+  defineConstant('COMPLETE', {
+    icon: 'done',
+    text: 'complete',
+  }),
+  defineConstant('DEFERRED', {
+    icon: 'access_time',
+    text: 'snooze',
+  }),
+  defineConstant('CANCELED', {
+    icon: 'close',
+    text: 'cancel',
+  }),
 )(Status);

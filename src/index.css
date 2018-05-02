@@ -3,6 +3,7 @@
   border: 0;
   box-shadow: none;
   box-sizing: border-box;
+  color: inherit;
   font: inherit;
   margin: 0;
   outline: 0;
@@ -22,7 +23,7 @@ body {
   margin: auto;
   margin-bottom: 50px;
   margin-top: 50px;
-  max-width: 450px;
+  max-width: 425px;
   position: relative;
   width: 100%;
 }
@@ -88,13 +89,14 @@ h2[data-placeholder]:before {
 .checklist-item[data-placeholder]:before {
   content: attr(data-placeholder);
   cursor: text;
+  left: 55px;
   opacity: 0.6;
   position: absolute;
 }
 
 .checklist-item, .status-icon, .item-controls {
   line-height: 20px;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .title {
@@ -109,8 +111,10 @@ h2[data-placeholder]:before {
 
 .checklist-item {
   min-height: 20px;
-  padding: 15px 20px 15px 20px;;
-  width: calc(100% - 75px);
+  /* padding-left = width of controls (64px) */
+  padding: 13px 64px 13px 20px;
+  position: relative;
+  width: calc(100% - 25px);
 }
 
 .checklist-item[selected=true] {
@@ -118,53 +122,74 @@ h2[data-placeholder]:before {
   border-left: 2px solid #16621B;
 }
 
-.checklist-item.ACTIVE div {
+.item-toggle {
+  position: absolute;
 }
 
-.checklist-item.CANCELED .checklist-item-content {
-  left: 35px;
-  opacity: 0.5;
+.checklist-item-content {
+  padding-left: 35px;
+}
+
+.current-status-icon {
+  float: left;
   position: relative;
-  text-decoration: line-through;
+  top: -2px;
+  z-index: 1;
+}
+
+.checklist-item.ACTIVE .current-status-icon {
+}
+
+.checklist-item.DEFERRED .current-status-icon {
+  color: #EE7826;
+}
+
+.checklist-item.DEFERRED .checklist-item-content {
+  opacity: 0.5;
 }
 
 .checklist-item.CANCELED .current-status-icon {
   color: #C62828;
 }
 
-.checklist-item.COMPLETE .checklist-item-content {
-  color: #16621B;
-  left: 35px;
-  position: relative;
+.checklist-item.CANCELED .checklist-item-content {
+  opacity: 0.5;
+  text-decoration: line-through;
 }
 
 .checklist-item.COMPLETE .current-status-icon {
   color: #509D55;
 }
 
-.current-status-icon {
-  left: 20px;
-  position: absolute;
-}
-
-.current-status-icon[status=COMPLETE] {
-  color: #509D55;
-}
-
-.current-status-icon[status=CANCELED] {
-  color: #C62828;
+.checklist-item.COMPLETE .checklist-item-content {
+  color: #16621B;
 }
 
 .item-controls {
-  display: flex;
-  font-size: 12px;
+  display: none;
   align-items: center;
   position: absolute;
-  right: 15px;
+  top: 9px;
+  right: 0;
+}
+
+.checklist-item:hover .item-controls {
+  display: flex;
+}
+
+.item-controls icon-btn {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.item-controls icon-btn:hover {
+  color: rgba(0, 0, 0, 0.84);
+}
+
+icon-btn * {
+  cursor: pointer;
 }
 
 .item-controls button {
-  cursor: pointer;
   display: block;
   padding: 2px 4px;
 }

@@ -9,21 +9,22 @@ export default () => {
   if (componentsDefined !== false) return;
 
   customElements.define('icon-btn', class IconBtn extends HTMLElement {
-    constructor(status) {
+    constructor(displayStatus, dataStatus = displayStatus) {
       super();
-      this.status = status;
+      this.displayStatus = displayStatus;
+      this.dataStatus = dataStatus;
       this.addEventListener('click', this.click);
     }
     connectedCallback() {
       fromTemplate.call(this, '.icon-btn-tpl');
-      this.querySelector('i').textContent = this.status.icon;
+      this.querySelector('i').textContent = this.displayStatus.icon;
     }
     disconnectedCallback() {
       this.removeEventListener('click', this.click);
     }
     get dataset() {
       return {
-        statusId: this.status.id,
+        statusId: this.dataStatus.id,
       };
     }
   });
