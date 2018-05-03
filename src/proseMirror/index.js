@@ -196,11 +196,10 @@ function buildNodeViews() {
       controls.classList.add('item-controls');
       if (currentStatus === itemStatuses.ACTIVE) {
         [
-          itemStatuses.CANCELED,
           itemStatuses.DEFERRED,
+          itemStatuses.CANCELED,
         ].forEach(status => {
-          const button = new IconBtn(status);
-          controls.appendChild(button);
+          controls.appendChild(new IconBtn(status));
         });
       }
 
