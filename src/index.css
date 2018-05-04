@@ -50,7 +50,9 @@ dropdown-menu {
 }
 
 dropdown-menu li {
-  padding: 10px 10px;
+  font-family: Roboto;
+  font-size: 15px;
+  padding: 12px 10px;
 }
 
 dropdown-menu li:hover {
