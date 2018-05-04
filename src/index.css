@@ -118,8 +118,7 @@ h2[data-placeholder]:before {
 }
 
 .checklist-item[selected=true] {
-  padding-left: 18px;
-  border-left: 2px solid #16621B;
+  padding-left: 20px;
 }
 
 .item-toggle {
