@@ -1,5 +1,13 @@
 import * as firebase from 'firebase';
 
+function getKeyValueTuple(obj) {
+  if (!obj) {
+    return [];
+  }
+  const [key] = Object.keys(obj);
+  return [key, obj[key]];
+}
+
 function getUserUid() {
   return firebase.auth().currentUser.uid;
 }
@@ -19,18 +27,14 @@ function getUserDocumentsRef(documentId) {
     .ref(`${getUserUid()}/documents${documentId ? `/${documentId}` : ''}`);
 }
 
-export function readCurrentDocument(func) {
-  getUserPreferencesRef()
-    .once('value', preferencesSnapshot => {
-      const preferences = preferencesSnapshot.val();
-      if (!preferences || !preferences.currentDocument) {
-        return func(null);
-      }
-      getUserDocumentsRef(preferences.currentDocument)
-        .once('value', documentSnapshot => {
-          func([preferences.currentDocument, documentSnapshot.val()]);
-        })
-    });
+export function readCurrentDocumentId() {
+  return new Promise((resolve, reject) => {
+    getUserPreferencesRef()
+      .once('value', snapshot => {
+        const value = snapshot.val();
+        resolve(value && value.currentDocument);
+      });
+  });
 }
 
 export function writeNewDocument(editorState) {
@@ -38,34 +42,90 @@ export function writeNewDocument(editorState) {
   const key = ref.push().key;
   const ts = Date.now();
   const data = {
-    [key]: { editorState, ts },
+    [key]: { createdTs: ts, id: key, snapshots: {} },
   };
   ref.update(data);
-  return [key, data];
+
+  return writeNewSnapshot(key, editorState).then(() => ([key, data]));
 }
 
 export function writeExistingDocument(documentId, editorState) {
-  const ref = getUserDocumentsRef(documentId);
-  const ts = Date.now();
-  ref.update({ editorState, ts });
+  return readCurrentSnapshotId(documentId)
+    .then(snapshotId => {
+      const data = writeExistingSnapshot(documentId, snapshotId, editorState);
+      return data;
+    });
 }
 
 export function writeCurrentDocument(documentId) {
   getCurrentDocumentRef().set(documentId);
 }
 
-function getSnapshotsRef(documentId) {
+function getSnapshotsRef(documentId, snapshotId) {
   return firebase.database()
-    .ref(`${getUserUid()}/documents/${documentId}/snapshots`)
+    .ref(`${getUserUid()}/documents/${documentId}/snapshots${snapshotId ? `/${snapshotId}`: ''}`)
 }
 
-export function writeSnapshot(documentId, document) {
-  const ref = getSnapshotsRef(documentId);
-  const key = ref.push().key;
+function getCurrentSnapshotRef(documentId) {
+  return firebase.database()
+    .ref(`${getUserUid()}/documents/${documentId}/snapshots`)
+    .orderByKey()
+    .limitToLast(1);
+}
+
+export function readCurrentSnapshotId(documentId) {
+  return new Promise((resolve, reject) => {
+    getCurrentSnapshotRef(documentId).once('value', snapshot => {
+      const value = snapshot.val();
+      if (value) {
+        const [key] = getKeyValueTuple(value);
+        resolve(key);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+export function readCurrentSnapshot() {
+  return readCurrentDocumentId()
+    .then(documentId => new Promise((resolve, reject) => {
+      getCurrentSnapshotRef(documentId).once('value', snapshot => {
+        const value = snapshot.val();
+        resolve(value ? getKeyValueTuple(value) : null);
+      });
+    }));
+}
+
+export function writeNewSnapshot(documentId, document) {
   const ts = Date.now();
-  const data = {
-    [key]: { document, ts },
-  };
-  ref.update(data);
-  return [key, data];
+
+  // Update the lastModifiedTs of the previous snapshot
+  return readCurrentSnapshotId(documentId)
+    .then(snapshotId => {
+      if (snapshotId) {
+        writeExistingSnapshot(documentId, snapshotId, document, ts);
+      }
+    })
+    .then(() => {
+      // Write a new snapshot
+      const key = getSnapshotsRef(documentId).push().key;
+      const data = {
+        [key]: {
+          createdTs: ts,
+          editorState: document,
+          id: key,
+          lastModifiedTs: ts,
+        },
+      };
+      getSnapshotsRef(documentId).update(data);
+      return [key, data];
+    });
+}
+
+function writeExistingSnapshot(documentId, snapshotId, editorState, ts) {
+  const lastModifiedTs = ts || Date.now();
+  const data = { editorState, lastModifiedTs };
+  getSnapshotsRef(documentId, snapshotId).update(data);
+  return data;
 }

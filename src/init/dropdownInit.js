@@ -7,10 +7,9 @@ export default () => {
   const menu = document.createElement('dropdown-menu');
 
   menu.addEventListener('new-snapshot', () => {
-    persistence.readCurrentDocument(result => {
+    persistence.readCurrentDocumentId().then(documentId => {
       const view = getEditorView();
-      const [documentId] = result;
-      persistence.writeSnapshot(documentId, view.state.toJSON());
+      persistence.writeNewSnapshot(documentId, view.state.toJSON());
       filterInactiveItems();
       menu.close();
     });

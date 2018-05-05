@@ -4,21 +4,14 @@ import {
   resetEditorState,
 } from '../proseMirror';
 
-const initialize = () => new Promise((resolve, reject) => {
-  persistence.readCurrentDocument(result => {
-    const view = initializeEditorView();
+const initialize = () => Promise.all([
+  persistence.readCurrentSnapshot(),
+  persistence.readCurrentDocumentId(),
+]).then(([snapshotResult, documentId]) => new Promise((resolve, reject) => {
+  const view = initializeEditorView();
+  window.view = view;
 
-    let documentId;
-
-    if (result === null) {
-      documentId = persistence.writeNewDocument(view.state.toJSON())[0];
-      persistence.writeCurrentDocument(documentId);
-    } else {
-      documentId = result[0];
-      const doc = result[1].editorState;
-      resetEditorState(doc);
-    }
-
+  function setEditorDispatch(documentId) {
     view.setProps({
       dispatchTransaction(transaction) {
         const nextState = view.state.apply(transaction);
@@ -26,11 +19,21 @@ const initialize = () => new Promise((resolve, reject) => {
         persistence.writeExistingDocument(documentId, view.state.toJSON());
       },
     });
+  }
 
-    window.view = view;
-
+  if (!documentId) {
+    persistence.writeNewDocument(view.state.toJSON())
+      .then(([key, data]) => {
+        persistence.writeCurrentDocument(key);
+        setEditorDispatch(key);
+        resolve(view);
+      })
+  } else {
+    const doc = snapshotResult[1].editorState;
+    resetEditorState(doc);
+    setEditorDispatch(documentId);
     resolve(view);
-  });
-});
+  }
+}));
 
 export default initialize;
