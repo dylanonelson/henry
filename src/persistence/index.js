@@ -37,6 +37,19 @@ export function readCurrentDocumentId() {
   });
 }
 
+export function readCurrentDocument() {
+  return readCurrentDocumentId()
+    .then(documentId => new Promise((resolve, reject) => {
+      if (documentId) {
+        getUserDocumentsRef(documentId).once('value', snapshot => {
+          resolve(snapshot.val());
+        });
+      } else {
+        resolve(null);
+      }
+    }));
+}
+
 export function writeNewDocument(editorState) {
   const ref = getUserDocumentsRef();
   const key = ref.push().key;

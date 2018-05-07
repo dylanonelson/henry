@@ -1,10 +1,16 @@
 import * as firebase from 'firebase';
 
 import * as persistence from '../persistence';
-import { getEditorView, filterInactiveItems } from '../proseMirror';
+import { getEditorView, getEditorViewDom, filterInactiveItems } from '../proseMirror';
+import { getRouter } from '../routes';
 
 export default () => {
+  const pmEditor = getEditorViewDom();
   const menu = document.createElement('dropdown-menu');
+
+  menu.addEventListener('all-snapshots', () => {
+    getRouter().navigate('./snapshots');
+  });
 
   menu.addEventListener('new-snapshot', () => {
     persistence.readCurrentDocumentId().then(documentId => {
@@ -20,5 +26,5 @@ export default () => {
     window.location.reload();
   });
 
-  document.querySelector('#dropdown').appendChild(menu);
+  pmEditor.dropdownContainer.appendChild(menu);
 };

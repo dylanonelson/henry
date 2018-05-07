@@ -37,7 +37,6 @@ export function buildSchema() {
           },
         },
         content: 'text*',
-        draggable: true,
         placeholder: 'New item...',
       },
       doc: {
@@ -299,16 +298,25 @@ function buildEditorProps() {
 }
 
 let view = null;
+let viewDom = null;
 
 export function initializeEditorView() {
   if (view !== null) {
     return view;
   }
 
+  const PMEditor = customElements.get('pm-editor');
+
+  viewDom = new PMEditor();
+
+  document.body.appendChild(viewDom);
+
   view = new EditorView(
-    document.querySelector('#editor'),
+    viewDom.editorContainer,
     buildEditorProps(),
   );
+
+  document.body.removeChild(viewDom);
 
   return view;
 }
@@ -317,7 +325,16 @@ export function getEditorView() {
   if (view === null) {
     throw new Error('The editor view hasn\'t been initialized yet');
   }
+
   return view;
+}
+
+export function getEditorViewDom() {
+  if (viewDom === null) {
+    throw new Error('The editor view hasn\'t been initialized yet');
+  }
+
+  return viewDom;
 }
 
 export function resetEditorState(json) {

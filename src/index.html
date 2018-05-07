@@ -3,15 +3,17 @@
 <head>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
   <meta name="viewport" content="width=device-width">
 </head>
 <body>
 
-  <div id="app">
-    <div id="dropdown"></div>
-    <div id="editor"></div>
-  </div>
+  <div id="app"></div>
+
+  <template class="editor-tpl">
+    <div class="dropdown"></div>
+    <div class="editor"></div>
+  </template>
 
   <template class="dropdown-tpl">
     <div class="dropdown-btn">
@@ -19,9 +21,35 @@
     </div>
     <div class="dropdown-menu">
       <ol>
+        <li id="all-snapshots">All snapshots</li>
         <li id="new-snapshot">New snapshot</li>
         <li id="sign-out">Sign out</li>
       </ol>
+    </div>
+  </template>
+
+  <template class="all-snapshots-tpl">
+      <div class="all-snapshots">
+        <h2>
+          <i class="material-icons back">arrow_back</i>
+          <p>All snapshots</p>
+        </h2>
+        <ol>
+        </ol>
+      </div>
+  </template>
+
+  <template class="snapshot-item-tpl">
+    <div class="snapshot-item">
+      <h3></h3>
+      <div class="created-at">
+        <h4>created</h4>
+        <p></p>
+      </div>
+      <div class="archived-at">
+        <h4>archived</h4>
+        <p></p>
+      </div>
     </div>
   </template>
 
