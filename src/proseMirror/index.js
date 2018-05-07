@@ -109,7 +109,11 @@ export function buildPlugins() {
           if (selection.empty && pos === $pos.end()) {
             // Add 2: 1 to leave title node and 1 to enter checklist node
             const nextPos = pos + 2;
-            tr.insert(nextPos, schema.nodes.checklistItem.create());
+            // Unless the checklist is empty (i.e., contains one empty
+            // checklistItem), insert a new, empty item
+            if (tr.doc.resolve(nextPos).parent.nodeSize > 4) {
+              tr.insert(nextPos, schema.nodes.checklistItem.create());
+            }
             // Set selection inside new checklist item
             const $nextPos = tr.doc.resolve(nextPos);
             tr.setSelection(Selection.findFrom($nextPos, 1));
