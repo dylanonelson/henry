@@ -41,6 +41,7 @@
     "firebase": "^4.13.1",
     "moment": "^2.22.1",
     "navigo": "^7.1.2",
+    "prosemirror-collab": "^1.0.0",
     "prosemirror-commands": "^1.0.7",
     "prosemirror-keymap": "^1.0.1",
     "prosemirror-model": "^1.4.0",

@@ -12,6 +12,14 @@ export default () => {
 
   firebase.initializeApp(config);
 
+  firebase.database().ref('.info/connected').on('value', function(connectedSnap) {
+    if (connectedSnap.val() === true) {
+      console.debug('+++ Firebase is CONNECTED +++');
+    } else {
+      console.debug('--- Firebase is DISCONNECTED ---');
+    }
+  });
+
   return new Promise((resolve, reject) => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       if (user) {

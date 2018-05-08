@@ -1,12 +1,5 @@
 import * as firebase from 'firebase';
-
-function getKeyValueTuple(obj) {
-  if (!obj) {
-    return [];
-  }
-  const [key] = Object.keys(obj);
-  return [key, obj[key]];
-}
+import { getKeyValueTuple } from '../util';
 
 function getUserUid() {
   return firebase.auth().currentUser.uid;
@@ -20,6 +13,11 @@ function getUserPreferencesRef() {
 function getCurrentDocumentRef() {
   return firebase.database()
     .ref(`${getUserUid()}/preferences/currentDocument`);
+}
+
+function getDocumentCacheRef(documentId) {
+  return firebase.database()
+    .ref(`${getUserUid()}/documents/${documentId}/documentCache`)
 }
 
 function getUserDocumentsRef(documentId) {
@@ -50,13 +48,39 @@ export function readCurrentDocument() {
     }));
 }
 
+export function readCurrentDocumentCache() {
+  return readCurrentDocumentId()
+    .then(documentId => new Promise((resolve, reject) => {
+      getDocumentCacheRef(documentId).once('value', snapshot => {
+        resolve(snapshot.val());
+      });
+    }));
+}
+
+export function writeDocumentCache(documentId, lastStepId, editorState) {
+  return getDocumentCacheRef(documentId).set({
+    editorState,
+    lastStepId,
+  });
+}
+
 export function writeNewDocument(editorState) {
   const ref = getUserDocumentsRef();
   const key = ref.push().key;
   const ts = Date.now();
   const data = {
-    [key]: { createdTs: ts, id: key, snapshots: {} },
+    [key]: {
+      createdTs: ts,
+      documentCache: {
+        editorState,
+        lastStepId: null,
+      },
+      id: key,
+      snapshots: {},
+      steps: {},
+    },
   };
+
   ref.update(data);
 
   return writeNewSnapshot(key, editorState).then(() => ([key, data]));
@@ -141,4 +165,25 @@ function writeExistingSnapshot(documentId, snapshotId, editorState, ts) {
   const data = { editorState, lastModifiedTs };
   getSnapshotsRef(documentId, snapshotId).update(data);
   return data;
+}
+
+export function getStepBatchesRef(documentId) {
+  return firebase.database()
+    .ref(`${getUserUid()}/documents/${documentId}/steps`);
+}
+
+export function readLatestStepBatch() {
+  return readCurrentDocumentId()
+    .then(documentId => new Promise((resolve, reject) => {
+      return getStepBatchesRef(documentId)
+        .orderByKey()
+        .limitToLast(1)
+        .once('value', snapshot => resolve(snapshot.val()));
+    }));
+}
+
+export function writeInitialStep(documentId) {
+  getStepBatchesRef(documentId)
+    .child('-1')
+    .set({ steps: [] });
 }
