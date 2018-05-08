@@ -2,7 +2,7 @@ import { Step } from 'prosemirror-transform';
 import { receiveTransaction, sendableSteps } from 'prosemirror-collab';
 
 import * as persistence from '../persistence';
-import { Worker } from '../util';
+import { PromiseWorker } from '../util';
 import {
   initializeEditorView,
   resetEditorState,
@@ -32,7 +32,7 @@ class NextBatchId {
 
 const NEXT_BATCH_ID = new NextBatchId();
 
-const worker = new Worker(1000);
+const worker = new PromiseWorker(1000);
 
 function sendStepsToFirebase(documentId, view) {
   const sendable = sendableSteps(view.state);

@@ -1,4 +1,4 @@
-class Worker {
+class PromiseWorker {
   constructor(restartInterval = 1000) {
     this.restartInterval = restartInterval;
     this.interval = null;
@@ -32,4 +32,4 @@ class Worker {
   }
 }
 
-export { Worker };
+export { PromiseWorker };

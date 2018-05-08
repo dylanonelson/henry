@@ -1,5 +1,5 @@
 export { itemStatuses } from './itemStatuses';
-export { Worker } from './Worker';
+export { PromiseWorker } from './PromiseWorker';
 
 export function getKeyValueTuple(obj) {
   if (!obj) {
