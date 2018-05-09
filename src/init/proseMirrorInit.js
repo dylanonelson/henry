@@ -2,7 +2,7 @@ import { Step } from 'prosemirror-transform';
 import { receiveTransaction, sendableSteps } from 'prosemirror-collab';
 
 import * as persistence from '../persistence';
-import { PromiseWorker } from '../util';
+import { Counter, PromiseWorker } from '../util';
 import {
   initializeEditorView,
   resetEditorState,
@@ -10,31 +10,11 @@ import {
 
 const UPDATE_CACHE_INTERVAL = 50;
 
-class NextBatchId {
-  constructor(initial = 0) {
-    this._value = initial;
-  }
-
-  get value() {
-    return this._value;
-  }
-
-  set value(_value) {
-    if (typeof _value === 'number') {
-      this._value = _value;
-    }
-  }
-
-  increment() {
-    this.value += 1;
-  }
-}
-
-const NEXT_BATCH_ID = new NextBatchId();
+const NEXT_TRANSACTION_ID = new Counter();
 
 const worker = new PromiseWorker(1000);
 
-function sendStepsToFirebase(documentId, view) {
+function sendTransactionToFirebase(documentId, view) {
   const sendable = sendableSteps(view.state);
 
   if (sendable === null) {
@@ -42,9 +22,9 @@ function sendStepsToFirebase(documentId, view) {
   }
 
   return new Promise((resolve, reject) => {
-    const nextBatchId = NEXT_BATCH_ID.value;
+    const nextTransactionId = NEXT_TRANSACTION_ID.value;
 
-    persistence.getStepBatchesRef(documentId).child(nextBatchId).transaction(child => {
+    persistence.getTransactionsRef(documentId).child(nextTransactionId).transaction(child => {
       if (child) {
         return;
       } else {
@@ -52,7 +32,7 @@ function sendStepsToFirebase(documentId, view) {
         const sendable = sendableSteps(view.state);
         return {
           clientID: sendable.clientID,
-          id: nextBatchId,
+          id: nextTransactionId,
           steps: sendable.steps.map(step => step.toJSON()),
         };
       }
@@ -62,8 +42,11 @@ function sendStepsToFirebase(documentId, view) {
         throw err;
       }
       if (success) {
-        if (nextBatchId % UPDATE_CACHE_INTERVAL === 0) {
-          persistence.writeDocumentCache(documentId, nextBatchId, view.state.toJSON());
+        if (
+          nextTransactionId !== 0 &&
+          nextTransactionId % UPDATE_CACHE_INTERVAL === 0
+        ) {
+          persistence.writeDocumentCache(documentId, nextTransactionId, view.state.toJSON());
         }
         resolve(sendable);
       } else {
@@ -73,14 +56,14 @@ function sendStepsToFirebase(documentId, view) {
   });
 }
 
-function subscribeToSteps(documentId, view) {
-  persistence.getStepBatchesRef(documentId)
+function subscribeToTransactions(documentId, view) {
+  persistence.getTransactionsRef(documentId)
     .orderByKey()
-    .startAt(NEXT_BATCH_ID.value.toString())
+    .startAt(NEXT_TRANSACTION_ID.value.toString())
     .on('child_added', snapshot => {
       const value = snapshot.val();
-      console.debug('new steps child:', value);
-      NEXT_BATCH_ID.increment();
+      console.debug('new transaction from Firebase:', value);
+      NEXT_TRANSACTION_ID.increment();
       const pmTransaction = receiveTransaction(
         view.state,
         value.steps.map(step => Step.fromJSON(view.state.schema, step)),
@@ -98,8 +81,8 @@ const initialize = () => Promise.all([
     const view = initializeEditorView();
     window.view = view;
 
-    if (documentCache && documentCache.lastStepId) {
-      NEXT_BATCH_ID.value = documentCache.lastStepId + 1;
+    if (documentCache && documentCache.lastTransactionId) {
+      NEXT_TRANSACTION_ID.value = documentCache.lastTransactionId + 1;
     }
 
     function setEditorDispatch(documentId) {
@@ -111,7 +94,7 @@ const initialize = () => Promise.all([
 
           // Collab
           if (worker.isWorking() === false) {
-            worker.resolve(() => sendStepsToFirebase(documentId, view));
+            worker.resolve(() => sendTransactionToFirebase(documentId, view));
           }
         },
       });
@@ -126,14 +109,14 @@ const initialize = () => Promise.all([
           return key;
         })
         .then(key => {
-          persistence.writeInitialStep(key);
-          subscribeToSteps(key, view);
+          persistence.writeInitialTransaction(key);
+          subscribeToTransactions(key, view);
         });
     } else {
       const doc = documentCache.editorState;
       resetEditorState(doc);
       setEditorDispatch(documentId);
-      subscribeToSteps(documentId, view);
+      subscribeToTransactions(documentId, view);
       resolve(view);
     }
 }));

@@ -57,10 +57,10 @@ export function readCurrentDocumentCache() {
     }));
 }
 
-export function writeDocumentCache(documentId, lastStepId, editorState) {
+export function writeDocumentCache(documentId, lastTransactionId, editorState) {
   return getDocumentCacheRef(documentId).set({
     editorState,
-    lastStepId,
+    lastTransactionId,
   });
 }
 
@@ -73,11 +73,11 @@ export function writeNewDocument(editorState) {
       createdTs: ts,
       documentCache: {
         editorState,
-        lastStepId: null,
+        lastTransactionId: -1,
       },
       id: key,
       snapshots: {},
-      steps: {},
+      transactions: {},
     },
   };
 
@@ -167,23 +167,23 @@ function writeExistingSnapshot(documentId, snapshotId, editorState, ts) {
   return data;
 }
 
-export function getStepBatchesRef(documentId) {
+export function getTransactionsRef(documentId) {
   return firebase.database()
-    .ref(`${getUserUid()}/documents/${documentId}/steps`);
+    .ref(`${getUserUid()}/documents/${documentId}/transactions`);
 }
 
-export function readLatestStepBatch() {
+export function readLatestTransaction() {
   return readCurrentDocumentId()
     .then(documentId => new Promise((resolve, reject) => {
-      return getStepBatchesRef(documentId)
+      return getTransactionsRef(documentId)
         .orderByKey()
         .limitToLast(1)
         .once('value', snapshot => resolve(snapshot.val()));
     }));
 }
 
-export function writeInitialStep(documentId) {
-  getStepBatchesRef(documentId)
+export function writeInitialTransaction(documentId) {
+  getTransactionsRef(documentId)
     .child('-1')
     .set({ steps: [] });
 }
