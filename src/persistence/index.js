@@ -103,6 +103,16 @@ function getSnapshotsRef(documentId, snapshotId) {
     .ref(`${getUserUid()}/documents/${documentId}/snapshots${snapshotId ? `/${snapshotId}`: ''}`)
 }
 
+export function readSnapshot(documentId, snapshotId) {
+  return new Promise((resolve) => {
+    getSnapshotsRef(documentId, snapshotId)
+      .once('value', snapshot => {
+        const value = snapshot.val();
+        resolve(value);
+      });
+  });
+}
+
 function getCurrentSnapshotRef(documentId) {
   return firebase.database()
     .ref(`${getUserUid()}/documents/${documentId}/snapshots`)

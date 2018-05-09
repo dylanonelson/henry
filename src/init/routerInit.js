@@ -1,9 +1,44 @@
+import { EditorState, Plugin } from 'prosemirror-state';
+
 import * as persistence from '../persistence';
-import { getEditorViewDom } from '../proseMirror';
+import {
+  buildPlugins,
+  buildSchema,
+  buildNodeViews,
+  getEditorViewDom,
+} from '../proseMirror';
 import { initializeRouter, setContent } from '../routes';
 
 export default () => {
   const router = initializeRouter();
+
+  router.on('/snapshots/:snapshotId', function({ snapshotId }) {
+    persistence.readCurrentDocumentId()
+      .then(documentId => {
+        return persistence.readSnapshot(documentId, snapshotId);
+      })
+      .then(snapshot => {
+        const state = EditorState.fromJSON(
+          {
+            plugins: buildPlugins(new Plugin({
+              filterTransaction() {
+                return false;
+              },
+            })),
+            schema: buildSchema(),
+          },
+          snapshot.editorState
+        );
+        const editorProps = {
+          editable: () => false,
+          nodeViews: buildNodeViews(),
+          state,
+        };
+        const SnapshotViewer = customElements.get('snapshot-viewer');
+        const snapshotViewer = new SnapshotViewer(snapshot, editorProps);
+        setContent(snapshotViewer);
+      });
+  });
 
   router.on('/snapshots', function() {
     const allSnapshots = document.createElement('all-snapshots');
@@ -17,7 +52,7 @@ export default () => {
           if (snapshotIds[snapshotIds.length - 1] === snapshotId) {
             return;
           }
-          allSnapshots.snapshotList.appendChild(
+          allSnapshots.snapshotList.prepend(
             new SnapshotItem(snapshots[snapshotId])
           );
         });

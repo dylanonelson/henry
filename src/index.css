@@ -178,6 +178,11 @@ h2[data-placeholder]:before {
   display: flex;
 }
 
+/* Don’t show controls if this is an archived snapshot */
+snapshot-viewer .checklist-item:hover .item-controls {
+  display: none;
+}
+
 .item-controls icon-btn {
   color: rgba(0, 0, 0, 0.54);
 }
@@ -235,14 +240,59 @@ icon-btn * {
   padding: 10px 0 20px 0;
 }
 
-.snapshot-item h4 {
+h4.snapshot-info {
   color: #4A4A4A;
   font-size: 14px;
   font-variant: small-caps;
   font-weight: 300;
-  margin-right: 12px;
+  width: 70px;
 }
 
-.snapshot-item .created-at {
-  margin-bottom: 5px;
+p.snapshot-info {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.created-at {
+  margin-bottom: 8px;
+}
+
+snapshot-viewer {
+  display: block;
+  min-height: 600px;
+  position: relative;
+}
+.snapshot-viewer {
+  height: 100%;
+}
+
+.snapshot-viewer .top {
+  display: grid;
+  grid-template-columns: 59px auto;
+  height: 65px;
+  line-height: 65px;
+}
+.snapshot-viewer .top i {
+  padding: 0 10px 0 19px;
+  cursor: pointer;
+  line-height: 65px;
+}
+
+.banner {
+  border-bottom: 1px solid rgba(200, 200, 200, 0.5);
+  font-family: Roboto;
+  padding-bottom: 25px;
+}
+
+.snapshot-info div {
+  display: flex;
+  align-items: baseline;
+  padding-left: 20px;
+}
+
+.snapshot-viewer .editor {
+  background: rgba(216, 216, 216, 0.25);
+  /* 133px is the height of the div.banner above */
+  min-height: calc(600px - 133px);
 }

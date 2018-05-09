@@ -1,11 +1,22 @@
 import moment from 'moment';
+import { EditorView } from 'prosemirror-view';
 
 import { getRouter } from '../routes';
 
+/**
+ * Initialize a web component using a template element already in the document
+ */
 function fromTemplate(selector) {
   const tpl = document.querySelector(selector);
   this.appendChild(tpl.content.cloneNode(true));
   this.rendered = true;
+}
+
+/**
+ * Navigate backwards in history
+ */
+function goBack() {
+  window.history.back();
 }
 
 let componentsDefined = false;
@@ -116,15 +127,11 @@ export default () => {
   customElements.define('all-snapshots', class extends HTMLElement {
     connectedCallback() {
       if (!this.rendered) fromTemplate.call(this, '.all-snapshots-tpl');
-      this.backButton.addEventListener('click', this.handleBackClick);
+      this.backButton.addEventListener('click', goBack);
     }
 
     disconnectedCallback() {
-      this.backButton.removeEventListener('click', this.handleBackClick);
-    }
-
-    handleBackClick() {
-      getRouter().navigate('..');
+      this.backButton.removeEventListener('click', goBack);
     }
 
     get backButton() {
@@ -178,6 +185,46 @@ export default () => {
 
     get dropdownContainer() {
       return this.querySelector('.dropdown');
+    }
+
+    get editorContainer() {
+      return this.querySelector('.editor');
+    }
+  });
+
+  customElements.define('snapshot-viewer', class extends HTMLElement {
+    constructor(snapshot, editorProps) {
+      super();
+      this.snapshot = snapshot;
+      this.editorProps = editorProps;
+    }
+
+    connectedCallback() {
+      if (!this.rendered) fromTemplate.call(this, '.snapshot-viewer-tpl');
+      this.createdAt.textContent = moment(this.snapshot.createdTs).format('YYYY-MM-DD HH:MM');
+      this.archivedAt.textContent = moment(this.snapshot.lastModifiedTs).format('YYYY-MM-DD HH:MM');
+      this.backButton.addEventListener('click', goBack);
+      this.editorView = new EditorView(
+        this.editorContainer,
+        this.editorProps
+      );
+    }
+
+    disconnectedCallback() {
+      this.editorView.destroy();
+      this.backButton.removeEventListener('click', goBack);
+    }
+
+    get archivedAt() {
+      return this.querySelector('.archived-at p');
+    }
+
+    get backButton() {
+      return this.querySelector('.back');
+    }
+
+    get createdAt() {
+      return this.querySelector('.created-at p');
     }
 
     get editorContainer() {

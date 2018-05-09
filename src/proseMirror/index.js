@@ -65,7 +65,7 @@ export function buildSchema() {
   return schema;
 }
 
-export function buildPlugins() {
+export function buildPlugins(...withPlugins) {
   const schema = buildSchema();
   const plugins = [
     collab(),
@@ -172,6 +172,7 @@ export function buildPlugins() {
         },
       },
     }),
+    ...withPlugins,
   ];
 
   return plugins;
@@ -186,7 +187,7 @@ function buildEditorState() {
   return state;
 }
 
-function buildNodeViews() {
+export function buildNodeViews() {
   const IconBtn = customElements.get('icon-btn');
 
   const nodeViews = {
@@ -290,7 +291,7 @@ function buildNodeViews() {
   return nodeViews;
 }
 
-function buildEditorProps() {
+export function buildEditorProps() {
   const props = {
     nodeViews: buildNodeViews(),
     state: buildEditorState(),
