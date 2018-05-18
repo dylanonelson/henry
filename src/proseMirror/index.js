@@ -67,10 +67,23 @@ export function buildSchema() {
   return schema;
 }
 
+let clientId = null;
+
+export function getClientId() {
+  if (clientId !== null) {
+    return clientId;
+  }
+
+  clientId = Math.floor(Math.random() * 0xFFFFFFFF);
+  return clientId;
+}
+
 export function buildPlugins(...withPlugins) {
   const schema = buildSchema();
   const plugins = [
-    collab(),
+    collab({
+      clientID: getClientId(),
+    }),
     keymap(Object.assign({}, baseKeymap, {
       Enter: (...args) => {
         const [state, dispatch] = args;

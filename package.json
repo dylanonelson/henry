@@ -48,6 +48,7 @@
     "prosemirror-state": "^1.2.0",
     "prosemirror-transform": "^1.0.9",
     "prosemirror-view": "^1.2.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack-cli": "^2.0.14"
   }
 }

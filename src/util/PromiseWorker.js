@@ -1,7 +1,9 @@
 class PromiseWorker {
   constructor(restartInterval = 1000) {
     this.restartInterval = restartInterval;
+
     this.interval = null;
+    this.errors = [];
     this.task = null;
 
     this.isWorking = this.isWorking.bind(this);
@@ -17,6 +19,7 @@ class PromiseWorker {
     if (this.task !== null) {
       throw new Error('Worker cannot resolve multiple tasks at once');
     }
+    this.errors = [];
     this.task = task;
     this.tryTask();
   }
@@ -26,7 +29,8 @@ class PromiseWorker {
       .then(() => {
         this.task = null;
       })
-      .catch(() => {
+      .catch(e => {
+        this.errors.push(e);
         setTimeout(this.tryTask, this.restartInterval);
       });
   }

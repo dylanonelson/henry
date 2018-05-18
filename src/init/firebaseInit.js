@@ -1,5 +1,7 @@
 import * as firebase from 'firebase';
+
 import { fadeOutLoading } from 'loading';
+import { getConnectionRef } from 'persistence';
 
 function activateLandingPage() {
   fadeOutLoading();
@@ -24,7 +26,7 @@ export default () => {
 
   firebase.initializeApp(config);
 
-  firebase.database().ref('.info/connected').on('value', function(connectedSnap) {
+  getConnectionRef().on('value', function(connectedSnap) {
     if (connectedSnap.val() === true) {
       console.debug('+++ Firebase is CONNECTED +++');
     } else {

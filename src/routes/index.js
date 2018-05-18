@@ -18,10 +18,6 @@ export function getRouter() {
   return router;
 }
 
-const domCache = new Map();
-
-window.domCache = domCache;
-
 function getRoot() {
   return document.querySelector('#app');
 }

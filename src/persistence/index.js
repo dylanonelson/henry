@@ -1,6 +1,18 @@
 import * as firebase from 'firebase';
 import { getKeyValueTuple } from '../util';
 
+export function getConnectionRef() {
+  return firebase.database().ref('.info/connected');
+}
+
+export function readDatabaseConnection() {
+  return new Promise((resolve, reject) => {
+    getConnectionRef().once('value', snapshot => (
+      resolve(snapshot.val())
+    ))
+  });
+}
+
 function getUserUid() {
   return firebase.auth().currentUser.uid;
 }
@@ -75,6 +87,7 @@ export function writeNewDocument(editorState) {
   const data = {
     [key]: {
       createdTs: ts,
+      currentTransactionId: -1,
       documentCache: initialDocument,
       id: key,
       initialDocument,
@@ -144,6 +157,14 @@ export function readCurrentSnapshot() {
         resolve(value ? getKeyValueTuple(value) : null);
       });
     }));
+}
+
+export function getCurrentTransactionIdRef(documentId) {
+  return getUserDocumentsRef(documentId).child('currentTransactionId');
+}
+
+export function writeCurrentTransactionId(documentId, transactionId) {
+  return getCurrentTransactionIdRef(documentId).set(transactionId);
 }
 
 export function writeNewSnapshot(documentId, firstTransactionId, document) {
