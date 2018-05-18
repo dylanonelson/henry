@@ -6,8 +6,7 @@ import webComponentsInit from './webComponentsInit';
 import { fadeOutLoading } from 'loading';
 
 export default () => {
-  firebaseInit()
-    .then(webComponentsInit)
+  Promise.all([firebaseInit(), webComponentsInit()])
     .then(proseMirrorInit)
     .then(dropdownInit)
     .then(routerInit)

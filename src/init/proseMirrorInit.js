@@ -69,7 +69,7 @@ function subscribeToTransactions(documentId, view) {
         value.steps.map(() => value.clientID),
       );
       view.dispatch(pmTransaction);
-  });
+    });
 }
 
 const initialize = () => Promise.all([
@@ -104,12 +104,12 @@ const initialize = () => Promise.all([
         .then(([key, data]) => {
           persistence.writeCurrentDocument(key);
           setEditorDispatch(key);
-          resolve(key);
           return key;
         })
         .then(key => {
           persistence.writeInitialTransaction(key);
           subscribeToTransactions(key, view);
+          resolve(key);
         });
     } else {
       const doc = documentCache.editorState;
