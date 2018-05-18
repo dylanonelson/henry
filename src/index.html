@@ -3,13 +3,55 @@
 <head>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400" rel="stylesheet">
   <meta name="viewport" content="width=device-width">
 </head>
 <body>
 
-  <div id="app"></div>
-  <div id="loading" class="active"></div>
+  <!-- Loading screen -->
+
+  <div id="loading" class="active">🏠</div>
+
+  <!-- Write the loading css directly into the document so there's no flash -->
+  <!-- of unstyled html -->
+  <style>
+    #loading {
+      background-color: #16621B;
+      display: none;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #loading.active {
+      align-items: center;
+      bottom: 0;
+      display: flex;
+      font-family: Roboto;
+      font-size: 100px;
+      justify-content: center;
+      left: 0;
+      opacity: 1;
+      padding-bottom: 150px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      z-index: 1000;
+    }
+    #loading.fade {
+      opacity: 0;
+    }
+  </style>
+
+  <!-- App screen, with default landing page already rendered -->
+
+  <div id="app">
+    <div id="landing">
+      <div class="landing-emoji">🏠</div>
+      <h1 class="landing-hed">Henry</h1>
+      <p class="landing-sub">Another checklist app</p>
+      <button class="landing-login">Log in with Google</button>
+    </div>
+  </div>
+
+  <!-- Templates -->
 
   <template class="editor-tpl">
     <div class="dropdown"></div>

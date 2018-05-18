@@ -1,4 +1,16 @@
 import * as firebase from 'firebase';
+import { fadeOutLoading } from 'loading';
+
+function activateLandingPage() {
+  fadeOutLoading();
+  const dom = document.querySelector('#landing');
+  dom.classList.add('active');
+  const loginBtn = dom.querySelector('button')
+  loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithRedirect(provider);
+  });
+}
 
 export default () => {
   const config = {
@@ -27,8 +39,7 @@ export default () => {
         unsubscribe();
         resolve(user);
       } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
+        activateLandingPage();
       }
     });
 

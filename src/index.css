@@ -1,4 +1,6 @@
 * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: none;
   border: 0;
   box-shadow: none;
@@ -19,25 +21,47 @@ body {
   font-family: 'Roboto Slab';
 }
 
-#loading {
-  background-color: #16621B;
-  display: none;
-  transition: opacity 0.5s ease-in-out;
-}
-
-#loading.active {
+#landing {
+  background: #16621B;
   bottom: 0;
-  display: block;
+  color: #fff;
+  font-family: Roboto;
   left: 0;
-  opacity: 1;
-  position: fixed;
+  position: absolute;
   right: 0;
+  text-align: center;
   top: 0;
-  z-index: 1000;
 }
 
-#loading.fade {
-  opacity: 0;
+#landing .landing-emoji {
+  font-size: 75px;
+  padding-top: 100px;
+}
+
+#landing .landing-hed {
+  font-size: 45px;
+  font-weight: 300;
+  margin-top: 25px;
+}
+
+#landing .landing-sub {
+  margin-top: 22px;
+  font-size: 20px;
+  font-weight: 300;
+}
+
+#landing .landing-login {
+  background: #fff;
+  border-radius: 2px;
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0 0 2px 0,
+    rgba(0, 2, 2, 0.24) 0 2px 2px 0;
+  color: #509D55;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 46px;
+  padding: 10px 12px;
+  text-transform: uppercase;
 }
 
 #app {
