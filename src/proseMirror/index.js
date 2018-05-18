@@ -5,7 +5,9 @@ import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { collab } from 'prosemirror-collab';
 
-import { itemStatuses } from '../util';
+import { Counter, itemStatuses } from '../util';
+
+export const NEXT_TRANSACTION_ID = new Counter();
 
 function isNodeType(node, typeName) {
   return node.type.name === typeName;

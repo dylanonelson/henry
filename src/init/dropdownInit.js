@@ -1,7 +1,12 @@
 import * as firebase from 'firebase';
 
 import * as persistence from '../persistence';
-import { getEditorView, getEditorViewDom, filterInactiveItems } from '../proseMirror';
+import {
+  NEXT_TRANSACTION_ID,
+  getEditorView,
+  getEditorViewDom,
+  filterInactiveItems,
+} from '../proseMirror';
 import { getRouter } from '../routes';
 
 export default () => {
@@ -15,7 +20,7 @@ export default () => {
   menu.addEventListener('new-snapshot', () => {
     persistence.readCurrentDocumentId().then(documentId => {
       const view = getEditorView();
-      persistence.writeNewSnapshot(documentId, view.state.toJSON());
+      persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
       filterInactiveItems();
       menu.close();
     });

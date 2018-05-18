@@ -2,15 +2,14 @@ import { Step } from 'prosemirror-transform';
 import { receiveTransaction, sendableSteps } from 'prosemirror-collab';
 
 import * as persistence from '../persistence';
-import { Counter, PromiseWorker } from '../util';
+import { PromiseWorker } from '../util';
 import {
+  NEXT_TRANSACTION_ID,
   initializeEditorView,
   resetEditorState,
 } from '../proseMirror';
 
 const UPDATE_CACHE_INTERVAL = 50;
-
-const NEXT_TRANSACTION_ID = new Counter();
 
 const worker = new PromiseWorker(1000);
 
