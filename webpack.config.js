@@ -1,7 +1,19 @@
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const AnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const path = require('path');
 const webpack = require('webpack');
 
+const plugins = [
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    },
+  }),
+  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+];
+
+if (process.env.ANALYZE_BUNDLE === 'true') {
+  plugins.push(new AnalyzerPlugin());
+}
 
 module.exports = {
   devServer: {
@@ -51,14 +63,7 @@ module.exports = {
     path: path.join(__dirname, 'dist'),
     filename: '[name].bundle.js'
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      },
-    }),
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-  ],
+  plugins,
   resolve: {
     modules: [
       path.join(__dirname, 'src'),
