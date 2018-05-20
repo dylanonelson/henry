@@ -1,12 +1,13 @@
-import moment from 'moment';
 import { EditorView } from 'prosemirror-view';
 
+import { dates } from '../util';
 import { getRouter } from '../routes';
 
 /**
  * Initialize a web component using a template element already in the document
  */
 function fromTemplate(selector) {
+  if (this.rendered === true) return;
   const tpl = document.querySelector(selector);
   this.appendChild(tpl.content.cloneNode(true));
   this.rendered = true;
@@ -32,7 +33,7 @@ export default () => {
     }
 
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.icon-btn-tpl');
+      fromTemplate.call(this, '.icon-btn-tpl');
       this.addEventListener('click', this.click);
       this.icon.textContent = this.displayStatus.icon;
     }
@@ -56,7 +57,7 @@ export default () => {
       this.status = status;
     }
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.current-status-icon-tpl');
+      fromTemplate.call(this, '.current-status-icon-tpl');
       this.querySelector('i').textContent = this.status.icon;
     }
   });
@@ -84,7 +85,7 @@ export default () => {
     }
 
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.dropdown-tpl');
+      fromTemplate.call(this, '.dropdown-tpl');
       this.menu.style.display = 'none';
       this.button.addEventListener('click', this.handleButtonClick);
       this.addEventListener('click', this.handleClick);
@@ -126,7 +127,7 @@ export default () => {
 
   customElements.define('all-snapshots', class extends HTMLElement {
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.all-snapshots-tpl');
+      fromTemplate.call(this, '.all-snapshots-tpl');
       this.backButton.addEventListener('click', goBack);
     }
 
@@ -150,10 +151,21 @@ export default () => {
     }
 
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.snapshot-item-tpl');
-      this.title.textContent = moment(this.snapshot.createdTs).format('dddd, MMMM D');
-      this.createdAt.textContent = moment(this.snapshot.createdTs).format('YYYY-MM-DD HH:MM');
-      this.archivedAt.textContent = moment(this.snapshot.lastModifiedTs).format('YYYY-MM-DD HH:MM');
+      fromTemplate.call(this, '.snapshot-item-tpl');
+
+      const created = new Date(this.snapshot.createdTs);
+      const monthName = dates.getMonthName(created);
+      const dayName = dates.getDayName(created);
+      const dayNum = created.getDate();
+      const createdIso = `${dates.getIsoDate(created)} ${dates.getIsoTime(created)}`;
+
+      const archived = new Date(this.snapshot.lastModifiedTs);
+      const archivedIso = `${dates.getIsoDate(archived)} ${dates.getIsoTime(archived)}`;
+
+      this.title.textContent = `${dayName}, ${monthName} ${dayNum}`;
+      this.createdAt.textContent = createdIso;
+      this.archivedAt.textContent = archivedIso;
+
       this.addEventListener('click', this.goToSnapshot);
     }
 
@@ -180,7 +192,7 @@ export default () => {
 
   customElements.define('pm-editor', class extends HTMLElement {
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.editor-tpl');
+      fromTemplate.call(this, '.editor-tpl');
     }
 
     get dropdownContainer() {
@@ -200,9 +212,13 @@ export default () => {
     }
 
     connectedCallback() {
-      if (!this.rendered) fromTemplate.call(this, '.snapshot-viewer-tpl');
-      this.createdAt.textContent = moment(this.snapshot.createdTs).format('YYYY-MM-DD HH:MM');
-      this.archivedAt.textContent = moment(this.snapshot.lastModifiedTs).format('YYYY-MM-DD HH:MM');
+      fromTemplate.call(this, '.snapshot-viewer-tpl');
+      const created = new Date(this.snapshot.createdTs);
+      const createdIso = `${dates.getIsoDate(created)} ${dates.getIsoTime(created)}`;
+      const archived = new Date(this.snapshot.lastModifiedTs);
+      const archivedIso = `${dates.getIsoDate(archived)} ${dates.getIsoTime(archived)}`;
+      this.createdAt.textContent = createdIso;
+      this.archivedAt.textContent = archivedIso;
       this.backButton.addEventListener('click', goBack);
       this.editorView = new EditorView(
         this.editorContainer,

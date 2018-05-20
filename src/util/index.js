@@ -1,5 +1,8 @@
+import * as dates from './dates';
 export { itemStatuses } from './itemStatuses';
 export { PromiseWorker } from './PromiseWorker';
+
+export { dates };
 
 export function getKeyValueTuple(obj) {
   if (!obj) {

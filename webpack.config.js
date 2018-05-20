@@ -47,15 +47,6 @@ module.exports = {
       test: /\.jsx?$/,
     }],
   },
-  optimization: {
-    minimizer: [
-      new UglifyJSPlugin({
-        uglifyOptions: {
-          mangle: false,
-        },
-      }),
-    ],
-  },
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].bundle.js'

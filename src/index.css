@@ -294,8 +294,9 @@ h4.snapshot-info {
 }
 
 p.snapshot-info {
+  font-family: 'Roboto Mono', Roboto;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 16px;
 }
 
