@@ -10,7 +10,9 @@
 
   <!-- Loading screen -->
 
-  <div id="loading" class="active">🏠</div>
+  <div id="loading" class="active">
+    <div class="loading-icon cabin-icon"></div>
+  </div>
 
   <!-- Write the loading css directly into the document so there's no flash -->
   <!-- of unstyled html -->
@@ -29,7 +31,7 @@
       justify-content: center;
       left: 0;
       opacity: 1;
-      padding-bottom: 150px;
+      padding-bottom: 50px;
       position: fixed;
       right: 0;
       top: 0;
@@ -38,15 +40,22 @@
     #loading.fade {
       opacity: 0;
     }
+    .cabin-icon {
+      background-color: #fff;
+      height: 100px;
+      -webkit-mask-image: url(/cabin.svg);
+      mask-image: url(/cabin.svg);
+      width: 100px;
+    }
   </style>
 
   <!-- App screen, with default landing page already rendered -->
 
   <div id="app">
     <div id="landing">
-      <div class="landing-emoji">🏠</div>
+      <div class="landing-icon cabin-icon"></div>
       <h1 class="landing-hed">Henry</h1>
-      <p class="landing-sub">Another checklist app</p>
+      <p class="landing-sub">A minimalist checklist app</p>
       <button class="landing-login">Log in with Google</button>
     </div>
   </div>

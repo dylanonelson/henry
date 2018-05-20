@@ -28,11 +28,11 @@ module.exports = {
         }
       ],
     }, {
-      test: /\.html/,
+      test: /(\.html|\.svg)/,
       use: [{
         loader: 'file-loader',
         options: {
-          name: '[name].html',
+          name: '[name].[ext]',
         },
       }],
     }, {
