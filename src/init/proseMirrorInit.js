@@ -93,7 +93,12 @@ function subscribeToTransactions(documentId, view) {
           .startAt(NEXT_TRANSACTION_ID.value)
           .once('value', snapshots => {
             snapshots.forEach(snapshot => {
-              receiveFirebaseTransaction(view, snapshot.val());
+              const transaction = snapshot.val();
+              // Only process this transaction if it's actually the next one;
+              // processing the transaction bumps the transaction counter
+              if (transaction.id === NEXT_TRANSACTION_ID.value) {
+                receiveFirebaseTransaction(view, transaction);
+              }
             });
           });
       }
