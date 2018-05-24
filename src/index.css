@@ -78,6 +78,10 @@ body {
   width: 100%;
 }
 
+.editor {
+  min-height: 550px;
+}
+
 /* ============= */
 /* Dropdown menu */
 /* ============= */
@@ -140,16 +144,14 @@ dropdown-menu li:hover {
   background-color: #509D55;
 }
 
-#editor {
-  position: relative;
-  width: 100%;
-}
-
 @media (max-width: 450px) {
   #app {
     margin-bottom: 0;
     margin-top: 0;
     min-height: 100vh;
+  }
+  .editor {
+    min-height: calc(100vh - 50px);
   }
 }
 
