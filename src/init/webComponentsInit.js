@@ -202,6 +202,10 @@ export default () => {
     get editorContainer() {
       return this.querySelector('.editor');
     }
+
+    get toolbarContainer() {
+      return this.querySelector('.toolbar');
+    }
   });
 
   customElements.define('snapshot-viewer', class extends HTMLElement {
@@ -245,6 +249,130 @@ export default () => {
 
     get editorContainer() {
       return this.querySelector('.editor');
+    }
+  });
+
+  customElements.define('editor-toolbar', class extends HTMLElement {
+    constructor() {
+      super();
+      this.handleClick = this.handleClick.bind(this);
+    }
+
+    connectedCallback() {
+      fromTemplate.call(this, '.editor-toolbar-tpl')
+      this.addEventListener('click', this.handleClick);
+    }
+
+    disconnectedCallback() {
+      this.removeEventListener('click', this.handleClick);
+    }
+
+    handleClick(e) {
+      let dom = e.target;
+      if (dom.tagName.toLowerCase() === 'i') {
+        dom = dom.parentElement;
+      }
+      if (dom.tagName.toLowerCase() !== 'button') {
+        return;
+      }
+      const action = dom.getAttribute('data-action');
+      this.dispatchEvent(new Event(action));
+    }
+  });
+
+  customElements.define('url-dialog', class extends HTMLElement {
+    constructor({ onCancel, onOk, onRemove, text, url }) {
+      super();
+      this.onCancel = onCancel;
+      this.onRemove = onRemove;
+      this.onOk = onOk;
+      this.handleCancelClick = this.handleCancelClick.bind(this);
+      this.handleGlobalKeyPress = this.handleGlobalKeyPress.bind(this);
+      this.handleOkClick = this.handleOkClick.bind(this);
+      this.handleRemoveClick = this.handleRemoveClick.bind(this);
+      this.textValue = text;
+      this.urlValue = url;
+    }
+
+    handleCancelClick() {
+      this.onCancel();
+    }
+
+    handleOkClick() {
+      const text = this.textInput.value;
+      const url = this.urlInput.value;
+      if (text === '') {
+        this.urlInput.style.border = '1px solid red';
+      } else {
+        this.onOk({ text, url });
+      }
+    }
+
+    handleRemoveClick() {
+      const text = this.textInput.value;
+      this.onRemove({ text });
+    }
+
+    connectedCallback() {
+      fromTemplate.call(this, '.url-dialog-tpl');
+      this.cancelBtn.addEventListener('click', this.handleCancelClick);
+      this.okBtn.addEventListener('click', this.handleOkClick);
+      this.removeBtn.addEventListener('click', this.handleRemoveClick);
+      this.textInput.value = this.textValue;
+      this.urlInput.value = this.urlValue;
+      if (!this.urlValue) {
+        this.removeBtn.style.display = 'none';
+      }
+
+      document.body.addEventListener('keydown', this.handleGlobalKeyPress);
+
+      this.urlInput.focus();
+    }
+
+    disconnectedCallback() {
+      this.okBtn.removeEventListener('click', this.handleOkClick);
+      this.cancelBtn.removeEventListener('click', this.handleCancelClick);
+      this.removeBtn.removeEventListener('click', this.handleRemoveClick);
+
+      document.body.removeEventListener('keydown', this.handleGlobalKeyPress);
+    }
+
+    handleGlobalKeyPress(e) {
+      switch (e.which) {
+        // esc
+        case 27: {
+          this.onCancel();
+          break;
+        }
+        // return
+        case 13: {
+          this.handleOkClick();
+          break;
+        }
+        default: {
+          // do nothing
+        }
+      }
+    }
+
+    get cancelBtn() {
+      return this.querySelector('button.cancel');
+    }
+
+    get okBtn() {
+      return this.querySelector('button.ok');
+    }
+
+    get removeBtn() {
+      return this.querySelector('button.remove');
+    }
+
+    get textInput() {
+      return this.querySelector('input#text');
+    }
+
+    get urlInput() {
+      return this.querySelector('input#url');
     }
   });
 

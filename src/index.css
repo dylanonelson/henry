@@ -78,6 +78,9 @@ body {
   width: 100%;
 }
 
+/* ============= */
+/* Dropdown menu */
+/* ============= */
 dropdown-menu {
   position: absolute;
   z-index: 1;
@@ -107,6 +110,34 @@ dropdown-menu li {
 
 dropdown-menu li:hover {
   background: rgba(0, 0, 0, 0.1);
+}
+
+/* ======= */
+/* Toolbar */
+/* ======= */
+
+.toolbar {
+  bottom: 0;
+  height: 50px;
+  position: sticky;
+  z-index: 1000;
+}
+
+.editor-toolbar {
+  background-color: #B8D5B9;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.editor-toolbar button {
+  cursor: pointer;
+  height: 50px;
+  width: 50px;
+}
+
+.editor-toolbar button:hover {
+  background-color: #509D55;
 }
 
 #editor {
@@ -174,6 +205,12 @@ h2[data-placeholder]:before {
 
 .checklist-item-content {
   padding-left: 35px;
+}
+
+.checklist-item-content a {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .current-status-icon {
@@ -341,4 +378,66 @@ snapshot-viewer {
   background: rgba(216, 216, 216, 0.25);
   /* 133px is the height of the div.banner above */
   min-height: calc(600px - 133px);
+}
+
+.dialog-background {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.url-dialog {
+  background: white;
+  border-radius: 2px;
+  box-shadow:
+    rgba(0, 0, 0, 0.22) 0 15px 12px,
+    rgba(0, 0, 0, 0.30) 0 19px 38px;
+  font-family: Roboto;
+  padding: 25px 25px 15px 25px;
+  transform: translateY(-25%);
+  width: 300px;
+}
+
+.url-dialog .text-input label {
+  display: block;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.url-dialog .text-input input {
+  display: block;
+  box-shadow:
+    inset rgba(0, 0, 0, 0.7) -1px -1px 1px,
+    inset rgba(0, 0, 0, 0.7) 1px 1px 1px;
+  height: 30px;
+  margin-bottom: 15px;
+  padding: 5px 8px;
+  width: 100%;
+}
+
+.url-dialog .text-input input:focus {
+  border: 1px solid blue;
+}
+
+.url-dialog .url-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 35px;
+  text-transform: uppercase;
+}
+
+.url-dialog button {
+  color: #509D55;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 15px;
+  text-transform: uppercase;
 }

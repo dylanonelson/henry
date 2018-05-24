@@ -2,6 +2,8 @@ import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { EditorState, Plugin, Selection } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
+import { history } from 'prosemirror-history';
+import { marks as BasicSchemaMarks } from 'prosemirror-schema-basic';
 import { keymap } from 'prosemirror-keymap';
 import { collab } from 'prosemirror-collab';
 
@@ -20,9 +22,15 @@ export function buildSchema() {
     return schema;
   }
   schema = new Schema({
+    marks: {
+      link: Object.assign(BasicSchemaMarks.link, {
+        inclusive: true,
+      }),
+    },
     nodes: {
       checklist: {
         content: 'checklistItem+',
+        marks: '_',
         toDOM(node) {
           return [
             'div',
@@ -40,16 +48,20 @@ export function buildSchema() {
           },
         },
         content: 'text*',
+        marks: '_',
         placeholder: 'New item...',
       },
       doc: {
         content: 'title checklist',
+        marks: '_',
       },
       text: {
         inline: true,
+        marks: '_',
       },
       title: {
         content: 'text*',
+        marks: '',
         placeholder: 'Title',
         toDOM(node) {
           return [
@@ -84,6 +96,7 @@ export function buildPlugins(...withPlugins) {
     collab({
       clientID: getClientId(),
     }),
+    history(),
     keymap(Object.assign({}, baseKeymap, {
       Enter: (...args) => {
         const [state, dispatch] = args;
@@ -297,6 +310,23 @@ export function buildNodeViews() {
         destroy() {
           controls.removeEventListener('click', handler);
           toggleBtn.addEventListener('click', handler);
+        },
+        dom,
+      };
+    },
+    link: node => {
+      const { href, title } = node.attrs;
+
+      function sendToUrl() {
+        window.open(href, title);
+      }
+
+      const dom = document.createElement('a');
+      dom.addEventListener('click', sendToUrl);
+
+      return {
+        destroy() {
+          dom.removeEventListener('click', sendToUrl);
         },
         dom,
       };
