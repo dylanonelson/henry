@@ -3,21 +3,29 @@ import { TextSelection } from 'prosemirror-state';
 
 import { getEditorView, getEditorViewDom } from '../proseMirror';
 
+let dialog = null;
+
+function linkDialogIsOpen() {
+  return dialog !== null;
+}
+
 export default () => {
   const EditorToolbar = customElements.get('editor-toolbar');
-  const toolbar = new EditorToolbar();
+  const UrlDialog = customElements.get('url-dialog');
   const viewDom = getEditorViewDom();
   const view = getEditorView();
 
-  toolbar.addEventListener('undo', () => {
-    undo(view.state, view.dispatch);
-  });
+  function closeLinkDialog() {
+    if (linkDialogIsOpen()) {
+      document.body.removeChild(dialog);
+      dialog = null;
+    }
+  }
 
-  toolbar.addEventListener('redo', () => {
-    redo(view.state, view.dispatch);
-  });
+  function openLinkDialog() {
+    // If it's already open, bail out
+    if (linkDialogIsOpen()) return;
 
-  toolbar.addEventListener('link', () => {
     const { state } = view;
     const { selection } = state;
     const { schema } = state;
@@ -68,10 +76,9 @@ export default () => {
 
     const text = view.state.doc.textBetween(nextFrom.pos, nextTo.pos);
 
-    const UrlDialog = customElements.get('url-dialog');
     const urlDialog = new UrlDialog({
       onCancel() {
-        document.body.removeChild(urlDialog);
+        closeLinkDialog();
       },
       onOk({ text, url }) {
         const { link } = schema.marks;
@@ -84,7 +91,7 @@ export default () => {
           textNode
         );
         view.dispatch(tr);
-        document.body.removeChild(urlDialog);
+        closeLinkDialog();
       },
       onRemove({ text }) {
         const textNode = schema.text(text);
@@ -95,14 +102,49 @@ export default () => {
           textNode
         );
         view.dispatch(tr);
-        document.body.removeChild(urlDialog);
+        closeLinkDialog();
       },
       text,
       url,
     });
 
+    dialog = urlDialog;
     document.body.appendChild(urlDialog);
+  }
+
+  function handleGlobalEvents(e) {
+    if (linkDialogIsOpen()) return;
+    const k = e.which === 75;
+    const z = e.which === 90;
+    const y = e.which === 89;
+    const meta = e.getModifierState('Meta');
+    if (z && meta) {
+      undo(view.state, view.dispatch);
+    } else if (y && meta) {
+      redo(view.state, view.dispatch);
+    } else if (meta && k) {
+      openLinkDialog();
+    }
+  }
+
+  const toolbar = new EditorToolbar({
+    onConnected() {
+      document.body.addEventListener('keydown', handleGlobalEvents);
+    },
+    onDisconnected() {
+      document.body.removeEventListener('keydown', handleGlobalEvents);
+    },
   });
+
+  toolbar.addEventListener('undo', () => {
+    undo(view.state, view.dispatch);
+  });
+
+  toolbar.addEventListener('redo', () => {
+    redo(view.state, view.dispatch);
+  });
+
+  toolbar.addEventListener('link', openLinkDialog);
 
   viewDom.toolbarContainer.appendChild(toolbar);
 }

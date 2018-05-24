@@ -253,18 +253,22 @@ export default () => {
   });
 
   customElements.define('editor-toolbar', class extends HTMLElement {
-    constructor() {
+    constructor({ onConnected, onDisconnected }) {
       super();
+      this.onConnected = onConnected;
+      this.onDisconnected = onDisconnected;
       this.handleClick = this.handleClick.bind(this);
     }
 
     connectedCallback() {
       fromTemplate.call(this, '.editor-toolbar-tpl')
       this.addEventListener('click', this.handleClick);
+      this.onConnected();
     }
 
     disconnectedCallback() {
       this.removeEventListener('click', this.handleClick);
+      this.onDisconnected();
     }
 
     handleClick(e) {
@@ -302,7 +306,7 @@ export default () => {
       const text = this.textInput.value;
       const url = this.urlInput.value;
       if (text === '') {
-        this.urlInput.style.border = '1px solid red';
+        this.textInput.style.border = '1px solid red';
       } else {
         this.onOk({ text, url });
       }
