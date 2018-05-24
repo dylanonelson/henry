@@ -128,7 +128,7 @@ dropdown-menu li:hover {
 }
 
 .editor-toolbar {
-  background-color: #B8D5B9;
+  border-top: 1px solid #c8c8c8;
   display: flex;
   width: 100%;
   justify-content: center;
@@ -141,7 +141,7 @@ dropdown-menu li:hover {
 }
 
 .editor-toolbar button:hover {
-  background-color: #509D55;
+  background-color: #B8D5B9;
 }
 
 @media (max-width: 450px) {
