@@ -247,6 +247,11 @@ h2[data-placeholder]:before {
   color: #509D55;
 }
 
+.checklist-item.COMPLETE .checklist-item-content,
+.checklist-item.COMPLETE .checklist-item-content a {
+  color: #16621B;
+}
+
 .checklist-item.COMPLETE .checklist-item-content {
   color: #16621B;
 }
