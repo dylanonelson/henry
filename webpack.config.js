@@ -40,7 +40,10 @@ module.exports = {
         }
       ],
     }, {
-      test: /(\.html|\.svg)/,
+      test: /\.html\.tpl$/,
+      use: 'template-dom-loader',
+    }, {
+      test: /(\.html$|\.svg$)/,
       use: [{
         loader: 'file-loader',
         options: {

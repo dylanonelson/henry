@@ -82,40 +82,6 @@ body {
   min-height: 550px;
 }
 
-/* ============= */
-/* Dropdown menu */
-/* ============= */
-dropdown-menu {
-  position: absolute;
-  z-index: 1;
-  top: 35px;
-  right: 15px;
-}
-
-dropdown-menu ol {
-  background: #fff;
-  box-shadow:
-    rgba(0, 0, 0, 0.12) 0px 1px 6px,
-    rgba(0, 0, 0, 0.12) 0px 1px 4px;
-  position: absolute;
-  right: 0;
-  width: 200px;
-}
-
-dropdown-menu {
-  cursor: pointer;
-}
-
-dropdown-menu li {
-  font-family: Roboto;
-  font-size: 15px;
-  padding: 12px 10px;
-}
-
-dropdown-menu li:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
 /* ======= */
 /* Toolbar */
 /* ======= */

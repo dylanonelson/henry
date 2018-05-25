@@ -1,14 +1,22 @@
 import { EditorView } from 'prosemirror-view';
 
+import allSnapshotsTpl from '../webComponents/allSnapshots.html.tpl';
+import currentStatusIconTpl from '../webComponents/currentStatusIcon.html.tpl';
+import dropdownTpl from '../webComponents/dropdown.html.tpl'
+import editorToolbarTpl from '../webComponents/editorToolbar.html.tpl';
+import editorTpl from '../webComponents/editor.html.tpl';
+import iconBtnTpl from '../webComponents/iconBtn.html.tpl';
+import snapshotItemTpl from '../webComponents/snapshotItem.html.tpl';
+import snapshotViewerTpl from '../webComponents/snapshotViewer.html.tpl';
+import urlDialogTpl from '../webComponents/urlDialog.html.tpl';
 import { dates } from '../util';
 import { getRouter } from '../routes';
 
 /**
  * Initialize a web component using a template element already in the document
  */
-function fromTemplate(selector) {
+function fromTemplate(tpl) {
   if (this.rendered === true) return;
-  const tpl = document.querySelector(selector);
   this.appendChild(tpl.content.cloneNode(true));
   this.rendered = true;
 }
@@ -33,7 +41,7 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.icon-btn-tpl');
+      fromTemplate.call(this, iconBtnTpl);
       this.addEventListener('click', this.click);
       this.icon.textContent = this.displayStatus.icon;
     }
@@ -57,7 +65,7 @@ export default () => {
       this.status = status;
     }
     connectedCallback() {
-      fromTemplate.call(this, '.current-status-icon-tpl');
+      fromTemplate.call(this, currentStatusIconTpl);
       this.querySelector('i').textContent = this.status.icon;
     }
   });
@@ -69,6 +77,8 @@ export default () => {
 
     constructor() {
       super();
+      this.attachShadow({ mode: 'open' })
+        .appendChild(dropdownTpl.content.cloneNode(true));
       this.handleButtonClick = this.handleButtonClick.bind(this);
       this.handleClick = this.handleClick.bind(this);
       this.handleDocumentClick = this.handleDocumentClick.bind(this);
@@ -85,16 +95,15 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.dropdown-tpl');
       this.menu.style.display = 'none';
       this.button.addEventListener('click', this.handleButtonClick);
-      this.addEventListener('click', this.handleClick);
+      this.shadowRoot.addEventListener('click', this.handleClick);
       document.addEventListener('click', this.handleDocumentClick);
     }
 
     disconnectedCallback() {
       this.button.removeEventListener('click', this.handleButtonClick);
-      this.removeEventListener('click', this.handleClick);
+      this.shadowRoot.removeEventListener('click', this.handleClick);
       document.removeEventListener('click', this.handleDocumentClick);
     }
 
@@ -117,17 +126,17 @@ export default () => {
     }
 
     get button() {
-      return this.querySelector('.dropdown-btn');
+      return this.shadowRoot.querySelector('.dropdown-btn');
     }
 
     get menu() {
-      return this.querySelector('.dropdown-menu');
+      return this.shadowRoot.querySelector('.dropdown-menu');
     }
   });
 
   customElements.define('all-snapshots', class extends HTMLElement {
     connectedCallback() {
-      fromTemplate.call(this, '.all-snapshots-tpl');
+      fromTemplate.call(this, allSnapshotsTpl);
       this.backButton.addEventListener('click', goBack);
     }
 
@@ -151,7 +160,7 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.snapshot-item-tpl');
+      fromTemplate.call(this, snapshotItemTpl);
 
       const created = new Date(this.snapshot.createdTs);
       const monthName = dates.getMonthName(created);
@@ -192,7 +201,7 @@ export default () => {
 
   customElements.define('pm-editor', class extends HTMLElement {
     connectedCallback() {
-      fromTemplate.call(this, '.editor-tpl');
+      fromTemplate.call(this, editorTpl);
     }
 
     get dropdownContainer() {
@@ -216,7 +225,7 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.snapshot-viewer-tpl');
+      fromTemplate.call(this, snapshotViewerTpl);
       const created = new Date(this.snapshot.createdTs);
       const createdIso = `${dates.getIsoDate(created)} ${dates.getIsoTime(created)}`;
       const archived = new Date(this.snapshot.lastModifiedTs);
@@ -261,7 +270,7 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.editor-toolbar-tpl')
+      fromTemplate.call(this, editorToolbarTpl)
       this.addEventListener('click', this.handleClick);
       this.onConnected();
     }
@@ -318,7 +327,7 @@ export default () => {
     }
 
     connectedCallback() {
-      fromTemplate.call(this, '.url-dialog-tpl');
+      fromTemplate.call(this, urlDialogTpl);
       this.cancelBtn.addEventListener('click', this.handleCancelClick);
       this.okBtn.addEventListener('click', this.handleOkClick);
       this.removeBtn.addEventListener('click', this.handleRemoveClick);
