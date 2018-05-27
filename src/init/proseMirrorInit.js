@@ -9,7 +9,7 @@ import {
   resetEditorState,
 } from '../proseMirror';
 
-const UPDATE_CACHE_INTERVAL = 20;
+const UPDATE_CACHE_INTERVAL = 10;
 
 /**
  * Send uncommitted transactions to Firebase

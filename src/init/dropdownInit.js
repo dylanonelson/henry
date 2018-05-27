@@ -18,11 +18,16 @@ export default () => {
   });
 
   menu.addEventListener('new-snapshot', () => {
-    persistence.readCurrentDocumentId().then(documentId => {
-      const view = getEditorView();
-      persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
-      filterInactiveItems();
-      menu.close();
+    persistence.readDatabaseConnection().then(connected => {
+      if (connected === false) {
+        return;
+      }
+      return persistence.readCurrentDocumentId().then(documentId => {
+        const view = getEditorView();
+        persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
+        filterInactiveItems();
+        menu.close();
+      });
     });
   });
 
