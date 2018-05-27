@@ -14,13 +14,13 @@ const months = [
 ];
 
 const days = [
+  'Sunday',
   'Monday',
   'Tuesday',
   'Wednesday',
   'Thursday',
   'Friday',
   'Saturday',
-  'Sunday',
 ];
 
 function padLeft(num) {
@@ -36,7 +36,7 @@ export function getMonthName(date) {
 }
 
 export function getDayName(date) {
-  return days[date.getDay() - 1];
+  return days[date.getDay()];
 }
 
 export function getIsoDate(date) {
