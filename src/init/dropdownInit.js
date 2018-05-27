@@ -20,15 +20,17 @@ export default () => {
   menu.addEventListener('new-snapshot', () => {
     persistence.readDatabaseConnection().then(connected => {
       if (connected === false) {
-        return;
+        return Promise.reject(
+          new Error('Cannot create new snapshot when offline')
+        );
       }
-      return persistence.readCurrentDocumentId().then(documentId => {
-        const view = getEditorView();
-        persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
-        filterInactiveItems();
-        menu.close();
-      });
-    });
+      return persistence.readCurrentDocumentId();
+    }).then(documentId => {
+      const view = getEditorView();
+      persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
+      filterInactiveItems();
+      menu.close();
+    }).catch(menu.close);
   });
 
   menu.addEventListener('sign-out', () => {

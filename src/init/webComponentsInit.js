@@ -79,6 +79,7 @@ export default () => {
       super();
       this.attachShadow({ mode: 'open' })
         .appendChild(dropdownTpl.content.cloneNode(true));
+      this.close = this.close.bind(this);
       this.handleButtonClick = this.handleButtonClick.bind(this);
       this.handleClick = this.handleClick.bind(this);
       this.handleDocumentClick = this.handleDocumentClick.bind(this);
