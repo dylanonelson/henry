@@ -20,6 +20,7 @@ const UPDATE_CACHE_INTERVAL = 10;
  */
 function sendTransactionToFirebase(documentId, view) {
   const sendable = sendableSteps(view.state);
+  const stateJson = view.state.toJSON();
 
   if (sendable === null) {
     return Promise.resolve();
@@ -57,7 +58,7 @@ function sendTransactionToFirebase(documentId, view) {
             persistence.writeDocumentCache(
               documentId,
               nextTransactionId,
-              view.state.toJSON(),
+              stateJson,
             );
           }
           receiveFirebaseTransaction(view, snapshot.val());
