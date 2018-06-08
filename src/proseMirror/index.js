@@ -364,6 +364,8 @@ export function initializeEditorView() {
     buildEditorProps(),
   );
 
+  view.dom.spellcheck = false;
+
   document.body.removeChild(viewDom);
 
   return view;
