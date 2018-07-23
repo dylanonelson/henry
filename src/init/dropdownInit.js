@@ -26,10 +26,13 @@ export default () => {
       }
       return persistence.readCurrentDocumentId();
     }).then(documentId => {
-      const view = getEditorView();
-      persistence.writeNewSnapshot(documentId, NEXT_TRANSACTION_ID.value, view.state.toJSON());
-      filterInactiveItems();
-      menu.close();
+      return persistence.writeNewSnapshot(
+        documentId,
+        NEXT_TRANSACTION_ID.value,
+        getEditorView().state.toJSON()
+      )
+      .then(filterInactiveItems)
+      .then(menu.close);
     }).catch(menu.close);
   });
 
