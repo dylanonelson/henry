@@ -37,6 +37,11 @@ function getUserDocumentsRef(documentId) {
     .ref(`${getUserUid()}/documents${documentId ? `/${documentId}` : ''}`);
 }
 
+function getDocumentSnapshotsRef(documentId) {
+  return firebase.database()
+    .ref(`${getUserUid()}/documents/${documentId}/snapshots`);
+}
+
 export function readCurrentDocumentId() {
   return new Promise((resolve, reject) => {
     getUserPreferencesRef()
@@ -58,6 +63,16 @@ export function readCurrentDocument() {
         resolve(null);
       }
     }));
+}
+
+export function readDocumentSnapshots() {
+  return readCurrentDocumentId()
+    .then(documentId => new Promise((resolve, reject) => (
+      getDocumentSnapshotsRef(documentId)
+        .orderByKey()
+        .limitToLast(25)
+        .once('value', snapshot => resolve(snapshot.val()))
+    )));
 }
 
 export function readCurrentDocumentCache() {

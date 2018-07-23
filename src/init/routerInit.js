@@ -43,9 +43,8 @@ export default () => {
   router.on('/snapshots', function() {
     const allSnapshots = document.createElement('all-snapshots');
     const SnapshotItem = customElements.get('snapshot-item');
-    persistence.readCurrentDocument()
-      .then(json => {
-        const { snapshots } = json;
+    persistence.readDocumentSnapshots()
+      .then(snapshots => {
         const snapshotIds = Object.keys(snapshots);
         snapshotIds.forEach(snapshotId => {
           // Don't render the current snapshot into the list
