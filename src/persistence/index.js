@@ -182,8 +182,21 @@ export function writeCurrentTransactionId(documentId, transactionId) {
   return getCurrentTransactionIdRef(documentId).set(transactionId);
 }
 
-export function writeNewSnapshot(documentId, firstTransactionId, document) {
+function getTitle(json) {
+  try {
+    const titleNode = json.doc.content.find(node => node.type === 'title');
+    return titleNode.content
+      .map(node => (node.type === 'text' && node.text) || '')
+      .join('');
+  } catch (e) {
+    // Don't make this a blocking step
+    return '';
+  }
+}
+
+export function writeNewSnapshot(documentId, firstTransactionId, doc) {
   const ts = Date.now();
+  const title = getTitle(doc);
 
   // Update the lastModifiedTs of the previous snapshot
   return readCurrentSnapshotId(documentId)
@@ -193,9 +206,10 @@ export function writeNewSnapshot(documentId, firstTransactionId, document) {
           documentId,
           snapshotId,
           {
-            document,
+            doc,
             lastModifiedTs: ts,
             lastTransactionId: firstTransactionId - 1,
+            title,
           },
         );
       }
@@ -206,7 +220,7 @@ export function writeNewSnapshot(documentId, firstTransactionId, document) {
       const data = {
         [key]: {
           createdTs: ts,
-          editorState: document,
+          editorState: doc,
           firstTransactionId,
           id: key,
           lastModifiedTs: ts,

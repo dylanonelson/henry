@@ -172,7 +172,9 @@ export default () => {
       const archived = new Date(this.snapshot.lastModifiedTs);
       const archivedIso = `${dates.getIsoDate(archived)} ${dates.getIsoTime(archived)}`;
 
-      this.title.textContent = `${dayName}, ${monthName} ${dayNum}`;
+      this.title.textContent = this.snapshot.title
+        ? this.snapshot.title
+        : `${dayName}, ${monthName} ${dayNum}`;
       this.createdAt.textContent = createdIso;
       this.archivedAt.textContent = archivedIso;
 
