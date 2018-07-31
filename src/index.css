@@ -120,6 +120,9 @@ body {
     margin-top: 0;
     min-height: calc(100vh - 50px);
   }
+  .editor {
+    min-height: 0;
+  }
   .toolbar {
     position: fixed;
     width: 100%;
