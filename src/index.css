@@ -17,8 +17,11 @@ ol {
 }
 
 body {
+  align-items: center;
   background: #eee;
+  display: flex;
   font-family: 'Roboto Slab';
+  min-height: 100vh;
 }
 
 #landing {
@@ -87,7 +90,7 @@ body {
 /* ======= */
 
 .toolbar {
-  bottom: 0;
+  bottom: -50px;
   height: 50px;
   position: sticky;
   z-index: 1000;
