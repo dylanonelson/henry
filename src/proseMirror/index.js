@@ -2,10 +2,10 @@ import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { EditorState, Plugin, Selection } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 import { baseKeymap } from 'prosemirror-commands';
-import { history } from 'prosemirror-history';
-import { marks as BasicSchemaMarks } from 'prosemirror-schema-basic';
-import { keymap } from 'prosemirror-keymap';
 import { collab } from 'prosemirror-collab';
+import { history } from 'prosemirror-history';
+import { keymap } from 'prosemirror-keymap';
+import { marks as BasicSchemaMarks } from 'prosemirror-schema-basic';
 
 import { Counter, itemStatuses } from '../util';
 
@@ -31,14 +31,9 @@ export function buildSchema() {
       checklist: {
         content: 'checklistItem+',
         marks: '_',
+        parseDOM: [{ tag: 'div.checklist' }],
         toDOM(node) {
-          return [
-            'div',
-            {
-              'class': 'checklist',
-            },
-            0,
-          ];
+          return ['div', { 'class': 'checklist' }, 0];
         },
       },
       checklistItem: {
@@ -49,7 +44,11 @@ export function buildSchema() {
         },
         content: 'text*',
         marks: '_',
+        parseDOM: [{ tag: 'div.checklist-item' }],
         placeholder: 'New item...',
+        toDOM() {
+          return ['div', { class: 'checklist-item' }, 0];
+        },
       },
       doc: {
         content: 'title checklist',
@@ -64,13 +63,7 @@ export function buildSchema() {
         marks: '',
         placeholder: 'Title',
         toDOM(node) {
-          return [
-            'h2',
-            {
-              'class': 'title',
-            },
-            0,
-          ];
+          return ['h2', { 'class': 'title' }, 0];
         },
       },
     },
