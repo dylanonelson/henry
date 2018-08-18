@@ -271,7 +271,7 @@ export function buildNodeViews() {
           lastPos = pos + node.nodeSize;
           const nodeStatus = itemStatuses.valueOf(node.attrs.status);
           const nextStatus = itemStatuses.valueOf(nextAttrs.status);
-          if (nodeStatus.ordinal() >= nextStatus.ordinal()) {
+          if (nodeStatus.ordinal() > nextStatus.ordinal()) {
             nextPos = pos;
             posHasBeenFound = true;
           }
