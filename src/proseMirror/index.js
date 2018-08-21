@@ -44,10 +44,22 @@ export function buildSchema() {
         },
         content: 'text*',
         marks: '_',
-        parseDOM: [{ tag: 'div.checklist-item' }],
+        parseDOM: [{
+          getAttrs(dom) {
+            return JSON.parse(dom.dataset['attrs']);
+          },
+          tag: 'div.checklist-item',
+        }],
         placeholder: 'New item...',
-        toDOM() {
-          return ['div', { class: 'checklist-item' }, 0];
+        toDOM(node) {
+          return [
+            'div',
+            {
+              class: 'checklist-item',
+              'data-attrs': JSON.stringify(node.attrs),
+            },
+            0,
+          ];
         },
       },
       doc: {
