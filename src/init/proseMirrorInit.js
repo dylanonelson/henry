@@ -119,6 +119,7 @@ const initialize = () => Promise.all([
     }
 
     function setEditorDispatch(documentId) {
+      worker.resolve(() => sendTransactionToFirebase(documentId, view));
       view.setProps({
         dispatchTransaction(transaction) {
           const nextState = view.state.apply(transaction);
@@ -126,8 +127,8 @@ const initialize = () => Promise.all([
           persistence.writeExistingDocument(documentId, view.state.toJSON());
 
           // Collab
-          if (worker.isWorking() === false) {
-            worker.resolve(() => sendTransactionToFirebase(documentId, view));
+          if (transaction.docChanged) {
+            worker.try();
           }
         },
       });

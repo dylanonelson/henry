@@ -1,3 +1,11 @@
+import { createEnum, defineConstant } from 'enumfactory';
+
+const WorkerStatus = createEnum(
+  defineConstant('IDLE'),
+  defineConstant('TRYING'),
+  defineConstant('WAITING'),
+)();
+
 class PromiseWorker {
   constructor(restartInterval = 1000) {
     this.restartInterval = restartInterval;
@@ -5,14 +13,10 @@ class PromiseWorker {
     this.interval = null;
     this.errors = [];
     this.task = null;
+    this.status = WorkerStatus.IDLE;
 
-    this.isWorking = this.isWorking.bind(this);
     this.resolve = this.resolve.bind(this);
     this.tryTask = this.tryTask.bind(this);
-  }
-
-  isWorking() {
-    return this.task !== null;
   }
 
   resolve(task) {
@@ -21,18 +25,26 @@ class PromiseWorker {
     }
     this.errors = [];
     this.task = task;
-    this.tryTask();
+  }
+
+  try() {
+    if (this.status === WorkerStatus.TRYING) {
+      this.promise = this.promise.then(this.tryTask);
+    } else if (this.status == WorkerStatus.IDLE) {
+      this.tryTask();
+    }
   }
 
   tryTask() {
-    this.task()
-      .then(() => {
-        this.task = null;
-      })
-      .catch(e => {
-        this.errors.push(e);
-        setTimeout(this.tryTask, this.restartInterval);
-      });
+    this.status = WorkerStatus.TRYING;
+    this.promise = this.task().then(() => {
+      this.status = WorkerStatus.IDLE;
+    })
+    .catch(e => {
+      this.errors.push(e);
+      this.status = WorkerStatus.WAITING;
+      setTimeout(this.tryTask, this.restartInterval);
+    });
   }
 }
 
