@@ -177,10 +177,6 @@ h2[data-placeholder]:before {
   width: calc(100% - 25px);
 }
 
-.checklist-item[selected=true] {
-  padding-left: 20px;
-}
-
 .item-toggle {
   position: absolute;
 }
@@ -235,6 +231,7 @@ h2[data-placeholder]:before {
   color: #16621B;
 }
 
+
 .item-controls {
   display: none;
   align-items: center;
@@ -243,8 +240,17 @@ h2[data-placeholder]:before {
   right: 0;
 }
 
-.checklist-item:hover .item-controls {
-  display: flex;
+/* On mobile devices, show the controls when the selection includes the node. On other devices, */
+/* show the controls when the user hovers over them */
+@media (max-width: 450px) {
+  .checklist-item[selected=true] .item-controls {
+    display: flex;
+  }
+}
+@media (min-width: 451px) {
+  .checklist-item:hover .item-controls {
+    display: flex;
+  }
 }
 
 /* Don’t show controls if this is an archived snapshot */

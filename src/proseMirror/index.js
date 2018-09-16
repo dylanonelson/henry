@@ -160,15 +160,13 @@ export function buildPlugins(...withPlugins) {
     new Plugin({
       props: {
         decorations: state => {
-          let decorations = []
+          const decorations = []
           const { doc, selection } = state;
+          const { from, to } = selection;
 
-          if (selection.empty && selection.anchor !== 0) {
-            const $pos = doc.resolve(selection.anchor);
-            decorations = [
-              Decoration.node($pos.start() - 1, $pos.end() + 1, { selected: true }),
-            ];
-          }
+          doc.nodesBetween(from, to, (node, pos) => {
+            decorations.push(Decoration.node(pos, pos + node.nodeSize, { selected: true }));
+          });
 
           return DecorationSet.create(doc, decorations);
         },
@@ -224,7 +222,7 @@ export function buildNodeViews() {
   const IconBtn = customElements.get('icon-btn');
 
   const nodeViews = {
-    checklistItem: (node, editorView, getPos) => {
+    checklistItem: (node, editorView, getPos, decorations) => {
       const currentStatus = itemStatuses.valueOf(node.attrs.status);
 
       const controls = document.createElement('div');
@@ -306,6 +304,9 @@ export function buildNodeViews() {
       const dom = document.createElement('div');
       dom.classList.add('checklist-item');
       dom.classList.add('data-status', currentStatus.id);
+      if (decorations.some(deco => deco.spec.selected)) {
+        dom.setAttribute('selected', true);
+      }
       dom.appendChild(toggle);
       dom.appendChild(controls);
       dom.appendChild(contentDOM);
