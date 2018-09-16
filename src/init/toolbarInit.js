@@ -176,16 +176,19 @@ export default () => {
 
   toolbar.addEventListener('undo', () => {
     undo(view.state, view.dispatch);
+    view.focus();
   });
 
   toolbar.addEventListener('redo', () => {
     redo(view.state, view.dispatch);
+    view.focus();
   });
 
   toolbar.addEventListener('link', openLinkDialog);
 
   toolbar.addEventListener('cut', () => {
     cutCurrentNodes(view.state, view.dispatch);
+    view.focus();
   });
 
   viewDom.toolbarContainer.appendChild(toolbar);
