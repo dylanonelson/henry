@@ -43,7 +43,7 @@ module.exports = {
       test: /\.html\.tpl$/,
       use: 'template-dom-loader',
     }, {
-      test: /(\.html$|\.svg$)/,
+      test: /(\.html$|\.svg$|\.png$)/,
       use: [{
         loader: 'file-loader',
         options: {
