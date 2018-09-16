@@ -8,7 +8,6 @@
   color: inherit;
   font: inherit;
   margin: 0;
-  outline: 0;
   padding: 0;
 }
 
@@ -112,6 +111,13 @@ body {
 
 .editor-toolbar button:hover {
   background-color: #B8D5B9;
+}
+
+.cut-icon {
+  display: block;
+  height: 20px;
+  margin: auto;
+  width: 20px;
 }
 
 @media (max-width: 450px) {
@@ -378,8 +384,9 @@ snapshot-viewer {
   background: white;
   border-radius: 2px;
   box-shadow:
-    rgba(0, 0, 0, 0.22) 0 15px 12px,
-    rgba(0, 0, 0, 0.30) 0 19px 38px;
+    0 2px 2px 0 rgba(0,0,0,0.14),
+    0 3px 1px -2px rgba(0,0,0,0.12),
+    0 1px 5px 0 rgba(0,0,0,0.2);
   font-family: Roboto;
   padding: 25px 25px 15px 25px;
   transform: translateY(-25%);
@@ -394,18 +401,12 @@ snapshot-viewer {
 }
 
 .url-dialog .text-input input {
+  border: 1px solid #c8c8c8;
   display: block;
-  box-shadow:
-    inset rgba(0, 0, 0, 0.7) -1px -1px 1px,
-    inset rgba(0, 0, 0, 0.7) 1px 1px 1px;
   height: 30px;
   margin-bottom: 15px;
   padding: 5px 8px;
   width: 100%;
-}
-
-.url-dialog .text-input input:focus {
-  border: 1px solid blue;
 }
 
 .url-dialog .url-dialog-buttons {

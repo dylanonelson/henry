@@ -8,4 +8,7 @@
   <button class="editor-icon-btn" data-action="link">
     <i class="material-icons">link</i>
   </button>
+  <button class="editor-icon-btn" data-action="cut">
+    <img class="cut-icon" src="/cut.svg" />
+  </button>
 </div>

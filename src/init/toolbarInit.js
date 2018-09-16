@@ -1,12 +1,46 @@
 import { redo, undo } from 'prosemirror-history';
 import { TextSelection } from 'prosemirror-state';
 
-import { getEditorView, getEditorViewDom } from '../proseMirror';
+import { getEditorView, getEditorViewDom, isNodeType } from '../proseMirror';
 
 let dialog = null;
 
 function linkDialogIsOpen() {
   return dialog !== null;
+}
+
+/*
+ * ProseMirror command that cuts the entire checklist node or nodes that are currently selected.
+ *
+ * @param {EditorState} state
+ * @param {function} dispatch
+ * @returns {boolean}
+ */
+function cutCurrentNodes(state, dispatch) {
+  const { doc, selection, tr } = state;
+  const { $from, $to } = selection;
+
+  if (!isNodeType($from.parent, 'checklistItem') || !isNodeType($to.parent, 'checklistItem')) {
+    return false;
+  }
+
+  if (!dispatch) {
+    return true;
+  }
+
+  // The positions encompassing the start and end of the selected items
+  const endpoints = [
+    $from.start() - 1,
+    $to.end() + 1,
+  ].map(ep => (
+    doc.resolve(ep)
+  ));
+
+  dispatch(tr.setSelection(new TextSelection(...endpoints)));
+
+  document.execCommand('cut');
+
+  return true;
 }
 
 export default () => {
@@ -116,14 +150,18 @@ export default () => {
     if (linkDialogIsOpen()) return;
     const k = e.which === 75;
     const z = e.which === 90;
+    const x = e.which === 88;
     const y = e.which === 89;
     const meta = e.getModifierState('Meta');
+    const shift = e.getModifierState('Shift');
     if (z && meta) {
       undo(view.state, view.dispatch);
     } else if (y && meta) {
       redo(view.state, view.dispatch);
     } else if (meta && k) {
       openLinkDialog();
+    } else if (meta && shift && x) {
+      cutCurrentNodes(view.state, view.dispatch);
     }
   }
 
@@ -145,6 +183,10 @@ export default () => {
   });
 
   toolbar.addEventListener('link', openLinkDialog);
+
+  toolbar.addEventListener('cut', () => {
+    cutCurrentNodes(view.state, view.dispatch);
+  });
 
   viewDom.toolbarContainer.appendChild(toolbar);
 }

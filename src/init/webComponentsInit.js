@@ -12,6 +12,23 @@ import urlDialogTpl from '../webComponents/urlDialog.html.tpl';
 import { dates } from '../util';
 import { getRouter } from '../routes';
 
+const HTTP_LINK = new RegExp('^https?://');
+const MAILTO_LINK = new RegExp('^mailto:');
+
+/**
+ * Adds the http:// prefix to a string if it doesn't have a protocol already.
+ *
+ * @param {string} link
+ * @returns {string}
+ */
+function addProtocol(link) {
+  if (HTTP_LINK.test(link) || MAILTO_LINK.test(link)) {
+    return link;
+  }
+
+  return `http://${link}`;
+}
+
 /**
  * Initialize a web component using a template element already in the document
  */
@@ -285,7 +302,7 @@ export default () => {
 
     handleClick(e) {
       let dom = e.target;
-      if (dom.tagName.toLowerCase() === 'i') {
+      if (dom.tagName.toLowerCase() === 'i' || dom.tagName.toLowerCase() === 'img') {
         dom = dom.parentElement;
       }
       if (dom.tagName.toLowerCase() !== 'button') {
@@ -317,10 +334,17 @@ export default () => {
     handleOkClick() {
       const text = this.textInput.value;
       const url = this.urlInput.value;
-      if (text === '') {
+      const textIsValid = text !== '';
+      const urlIsValid = url !== '';
+
+      if (!textIsValid) {
         this.textInput.style.border = '1px solid red';
-      } else {
-        this.onOk({ text, url });
+      }
+      if (!urlIsValid) {
+        this.urlInput.style.border = '1px solid red';
+      }
+      if (textIsValid && urlIsValid) {
+        this.onOk({ text, url: addProtocol(url) });
       }
     }
 
