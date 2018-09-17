@@ -293,6 +293,7 @@ export function buildNodeViews() {
         tr.insert(nextPos || lastPos, nextNode);
 
         editorView.dispatch(tr);
+        editorView.focus();
       };
 
       controls.addEventListener('click', handler);
