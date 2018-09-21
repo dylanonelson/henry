@@ -293,7 +293,10 @@ export function buildNodeViews() {
         tr.insert(nextPos || lastPos, nextNode);
 
         editorView.dispatch(tr);
-        editorView.focus();
+
+        if (viewHadFocusBeforeClick) {
+          editorView.focus();
+        }
       };
 
       controls.addEventListener('click', handler);
@@ -354,6 +357,7 @@ export function buildEditorProps() {
 
 let view = null;
 let viewDom = null;
+let viewHadFocusBeforeClick = false;
 
 export function initializeEditorView() {
   if (view !== null) {
@@ -374,6 +378,11 @@ export function initializeEditorView() {
   view.dom.spellcheck = false;
 
   document.body.removeChild(viewDom);
+
+  // Track when a click has unfocused the editor view so we can restore focus when necessary
+  document.addEventListener('mousedown', () => {
+    viewHadFocusBeforeClick = view.hasFocus();
+  });
 
   return view;
 }
