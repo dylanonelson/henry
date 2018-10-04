@@ -103,9 +103,9 @@ export default () => {
     }
 
     attributeChangedCallback(name, prev, next) {
-      this.menu.style.display = this.getAttribute('open') === 'true'
-        ? 'block'
-        : 'none';
+      const isOpen = this.getAttribute('open') === 'true';
+      this.menu.style.display = isOpen ? 'block' : 'none';
+      this.button.style.background = isOpen ? '#eee' : 'none';
     }
 
     close() {

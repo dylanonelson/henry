@@ -43,7 +43,7 @@ body {
 #landing .landing-hed {
   font-size: 45px;
   font-weight: 300;
-  margin-top: 25px;
+  margin-top: 35px;
 }
 
 #landing .landing-sub {
@@ -55,15 +55,18 @@ body {
 #landing .landing-login {
   background: #fff;
   border-radius: 2px;
+  bottom: 125px;
   box-shadow:
     rgba(0, 0, 0, 0.12) 0 0 2px 0,
     rgba(0, 2, 2, 0.24) 0 2px 2px 0;
   color: #509D55;
   cursor: pointer;
   font-size: 14px;
-  margin-top: 46px;
+  left: 50%;
   padding: 10px 12px;
+  position: absolute;
   text-transform: uppercase;
+  transform: translateX(-50%);
 }
 
 #app {
@@ -71,6 +74,7 @@ body {
   box-shadow:
     rgba(0, 0, 0, 0.12) 0px 1px 6px,
     rgba(0, 0, 0, 0.12) 0px 1px 4px;
+  height: 100%;
   margin: auto;
   margin-bottom: 50px;
   margin-top: 50px;
@@ -122,9 +126,9 @@ body {
 
 @media (max-width: 450px) {
   #app {
+    min-height: 100vh;
     margin-bottom: 50px;
     margin-top: 0;
-    min-height: calc(100vh - 50px);
   }
   .editor {
     min-height: 0;

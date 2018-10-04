@@ -43,8 +43,11 @@ ol {
   cursor: pointer;
   position: absolute;
   right: 15px;
-  top: 35px;
+  top: 31px;
   z-index: 1;
+}
+.dropdown-btn {
+  padding: 4px 6px;
 }
 ol {
   background: #fff;
