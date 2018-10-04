@@ -107,6 +107,8 @@ export function buildPlugins(...withPlugins) {
         const [state, dispatch] = args;
         const { selection, tr } = state;
 
+        tr.scrollIntoView();
+
         const currentNode = selection.$from.parent;
 
         if (isNodeType(currentNode, 'checklistItem')) {
@@ -349,6 +351,10 @@ export function buildNodeViews() {
 export function buildEditorProps() {
   const props = {
     nodeViews: buildNodeViews(),
+    // Height of toolbar + bottom padding of single item
+    scrollMargin: 65,
+    // Height of toolbar
+    scrollThreshold: 52,
     state: buildEditorState(),
   };
 
