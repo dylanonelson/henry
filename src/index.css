@@ -76,8 +76,6 @@ body {
     rgba(0, 0, 0, 0.12) 0px 1px 4px;
   height: 100%;
   margin: auto;
-  margin-bottom: 50px;
-  margin-top: 50px;
   max-width: 425px;
   min-height: 600px;
   position: relative;
@@ -127,8 +125,8 @@ body {
 @media (max-width: 450px) {
   #app {
     min-height: 100vh;
-    margin-bottom: 50px;
     margin-top: 0;
+    padding-bottom: 50px;
   }
   .editor {
     min-height: 0;
