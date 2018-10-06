@@ -123,6 +123,7 @@ export default () => {
       this.button.removeEventListener('click', this.handleButtonClick);
       this.shadowRoot.removeEventListener('click', this.handleClick);
       document.removeEventListener('click', this.handleDocumentClick);
+      this.setAttribute('open', false);
     }
 
     handleButtonClick() {
