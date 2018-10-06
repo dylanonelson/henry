@@ -23,27 +23,34 @@ body {
   min-height: 100vh;
 }
 
-#landing {
+#landing-container {
   background: #16621B;
   bottom: 0;
-  color: #fff;
-  font-family: Roboto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   left: 0;
   position: absolute;
   right: 0;
-  text-align: center;
   top: 0;
+}
+
+#landing {
+  color: #fff;
+  font-family: Roboto;
+  position: relative;
+  top: -2%;
+  text-align: center;
 }
 
 #landing .cabin-icon {
   margin: auto;
-  margin-top: 100px;
 }
 
 #landing .landing-hed {
   font-size: 45px;
   font-weight: 300;
-  margin-top: 35px;
+  margin-top: 25px;
 }
 
 #landing .landing-sub {
@@ -55,7 +62,6 @@ body {
 #landing .landing-login {
   background: #fff;
   border-radius: 2px;
-  bottom: 125px;
   box-shadow:
     rgba(0, 0, 0, 0.12) 0 0 2px 0,
     rgba(0, 2, 2, 0.24) 0 2px 2px 0;
@@ -63,10 +69,9 @@ body {
   cursor: pointer;
   font-size: 14px;
   left: 50%;
+  margin-top: 85px;
   padding: 10px 12px;
-  position: absolute;
   text-transform: uppercase;
-  transform: translateX(-50%);
 }
 
 #app {
