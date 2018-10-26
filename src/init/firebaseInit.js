@@ -17,7 +17,7 @@ function activateLandingPage() {
 export default () => {
   const config = {
     apiKey: "AIzaSyDXhqlzBTf-o9H-YrG0zaG8RuPi2kxw5TY",
-    authDomain: "henry-8a09d.firebaseapp.com",
+    authDomain: "auth.henryapp.io",
     databaseURL: "https://henry-8a09d.firebaseio.com",
     messagingSenderId: "209257396310",
     projectId: "henry-8a09d",
