@@ -47,10 +47,15 @@ ol {
   z-index: 1;
 }
 .dropdown-btn {
-  padding: 4px 6px;
+  border-radius: 50%;
+  padding: 0px 6px;
+}
+.dropdown-btn i {
+  line-height: 36px;
 }
 ol {
   background: #fff;
+  border-radius: 2px;
   box-shadow:
     rgba(0, 0, 0, 0.12) 0px 1px 6px,
     rgba(0, 0, 0, 0.12) 0px 1px 4px;

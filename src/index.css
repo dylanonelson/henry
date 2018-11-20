@@ -131,10 +131,10 @@ body {
   #app {
     min-height: 100vh;
     margin-top: 0;
-    padding-bottom: 50px;
   }
   .editor {
     min-height: 0;
+    padding-bottom: 50px;
   }
   .toolbar {
     position: fixed;
@@ -377,7 +377,7 @@ snapshot-viewer {
 .snapshot-viewer .editor {
   background: rgba(216, 216, 216, 0.25);
   /* 133px is the height of the div.banner above */
-  min-height: calc(600px - 133px);
+  min-height: calc(100vh - 133px);
 }
 
 .dialog-background {
