@@ -124,7 +124,6 @@ const initialize = () => Promise.all([
         dispatchTransaction(transaction) {
           const nextState = view.state.apply(transaction);
           view.updateState(nextState);
-          persistence.writeExistingDocument(documentId, view.state.toJSON());
 
           // Collab
           if (transaction.docChanged) {

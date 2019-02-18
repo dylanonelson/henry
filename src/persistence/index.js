@@ -116,14 +116,6 @@ export function writeNewDocument(editorState) {
   return writeNewSnapshot(key, -1, editorState).then(() => ([key, data]));
 }
 
-export function writeExistingDocument(documentId, editorState) {
-  return readCurrentSnapshotId(documentId)
-    .then(snapshotId => {
-      const data = writeExistingSnapshot(documentId, snapshotId, { editorState });
-      return data;
-    });
-}
-
 export function writeCurrentDocument(documentId) {
   getCurrentDocumentRef().set(documentId);
 }
@@ -194,8 +186,9 @@ function getTitle(json) {
   }
 }
 
-export function writeNewSnapshot(documentId, firstTransactionId, doc) {
+export function writeNewSnapshot(documentId, firstTransactionId, editorState) {
   const ts = Date.now();
+  const { doc } = editorState;
   const title = getTitle(doc);
 
   // Update the lastModifiedTs of the previous snapshot
@@ -206,7 +199,7 @@ export function writeNewSnapshot(documentId, firstTransactionId, doc) {
           documentId,
           snapshotId,
           {
-            doc,
+            editorState,
             lastModifiedTs: ts,
             lastTransactionId: firstTransactionId - 1,
             title,
@@ -220,7 +213,7 @@ export function writeNewSnapshot(documentId, firstTransactionId, doc) {
       const data = {
         [key]: {
           createdTs: ts,
-          editorState: doc,
+          editorState,
           firstTransactionId,
           id: key,
           lastModifiedTs: ts,
