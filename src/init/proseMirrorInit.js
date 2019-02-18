@@ -55,6 +55,7 @@ function sendTransactionToFirebase(documentId, view) {
             nextTransactionId !== 0 &&
             nextTransactionId % UPDATE_CACHE_INTERVAL === 0
           ) {
+            console.log('writing document cache');
             persistence.writeDocumentCache(
               documentId,
               nextTransactionId,
@@ -85,25 +86,31 @@ function receiveFirebaseTransaction(view, transaction) {
 }
 
 function subscribeToTransactions(documentId, view) {
-  persistence.getCurrentTransactionIdRef(documentId)
-    .on('value', snapshot => {
-      const transactionId = snapshot.val();
-      if (transactionId !== (NEXT_TRANSACTION_ID.value - 1)) {
-        persistence.getTransactionsRef(documentId)
-          .orderByChild('id')
-          .startAt(NEXT_TRANSACTION_ID.value)
-          .once('value', snapshots => {
-            snapshots.forEach(snapshot => {
-              const transaction = snapshot.val();
-              // Only process this transaction if it's actually the next one;
-              // processing the transaction bumps the transaction counter
-              if (transaction.id === NEXT_TRANSACTION_ID.value) {
-                receiveFirebaseTransaction(view, transaction);
-              }
+  return new Promise((resolve, reject) => {
+    persistence.getCurrentTransactionIdRef(documentId)
+      .on('value', snapshot => {
+        const transactionId = snapshot.val();
+        console.log('on value');
+        if (transactionId !== (NEXT_TRANSACTION_ID.value - 1)) {
+          persistence.getTransactionsRef(documentId)
+            .orderByChild('id')
+            .startAt(NEXT_TRANSACTION_ID.value)
+            .once('value', snapshots => {
+              snapshots.forEach(snapshot => {
+                const transaction = snapshot.val();
+                // Only process this transaction if it's actually the next one;
+                // processing the transaction bumps the transaction counter
+                if (transaction.id === NEXT_TRANSACTION_ID.value) {
+                  receiveFirebaseTransaction(view, transaction);
+                }
+              });
+              resolve(NEXT_TRANSACTION_ID.value);
             });
-          });
-      }
-    });
+        } else {
+          resolve(transactionId);
+        }
+      });
+  });
 }
 
 const initialize = () => Promise.all([
@@ -142,15 +149,13 @@ const initialize = () => Promise.all([
         })
         .then(key => {
           persistence.writeInitialTransaction(key);
-          subscribeToTransactions(key, view);
-          resolve(key);
+          subscribeToTransactions(key, view).then(resolve);
         });
     } else {
       const doc = documentCache.editorState;
       resetEditorState(doc);
       setEditorDispatch(documentId);
-      subscribeToTransactions(documentId, view);
-      resolve(view);
+      subscribeToTransactions(documentId, view).then(resolve);
     }
 }));
 
