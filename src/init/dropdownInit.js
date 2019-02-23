@@ -3,9 +3,10 @@ import * as firebase from 'firebase';
 import * as persistence from '../persistence';
 import {
   NEXT_TRANSACTION_ID,
+  autofillTitle,
   getEditorView,
   getEditorViewDom,
-  filterInactiveItems,
+  autofillSnapshot,
 } from '../proseMirror';
 import { getRouter } from '../routes';
 
@@ -31,9 +32,14 @@ export default () => {
         NEXT_TRANSACTION_ID.value,
         getEditorView().state.toJSON()
       )
-      .then(filterInactiveItems)
+      .then(autofillSnapshot)
       .then(menu.close);
     }).catch(menu.close);
+  });
+
+  menu.addEventListener('autofill-title', () => {
+    autofillTitle();
+    menu.close();
   });
 
   menu.addEventListener('sign-out', () => {

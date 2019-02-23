@@ -51,3 +51,11 @@ export function getIsoTime(date) {
   const minutes = padLeft(date.getMinutes());
   return `${hours}:${minutes}`;
 }
+
+export function getDayTitle() {
+  const date = new Date();
+  const dayName = getDayName(date);
+  const number = date.getDate();
+  const month = getMonthName(date);
+  return `${dayName}, ${month} ${number}`;
+}

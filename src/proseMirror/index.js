@@ -7,7 +7,7 @@ import { history } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { marks as BasicSchemaMarks } from 'prosemirror-schema-basic';
 
-import { Counter, itemStatuses } from '../util';
+import { Counter, dates, itemStatuses } from '../util';
 
 export const NEXT_TRANSACTION_ID = new Counter();
 
@@ -417,12 +417,10 @@ export function resetEditorState(json) {
   }, json));
 }
 
-export function filterInactiveItems() {
+export function getFilterInactiveItemsTr(tr) {
   const view = getEditorView();
-  const { state } = view;
-  const { tr } = state;
 
-  state.doc.descendants((node, pos) => {
+  tr.doc.descendants((node, pos) => {
     if (isNodeType(node, 'checklistItem') === false) {
       return;
     }
@@ -432,7 +430,7 @@ export function filterInactiveItems() {
       tr.delete(deleteAt, deleteAt + node.nodeSize);
     } else if (node.attrs.status === itemStatuses.DEFERRED.id) {
       const replaceAt = tr.mapping.map(pos);
-      const nextNode = state.schema.nodes.checklistItem.create(
+      const nextNode = view.state.schema.nodes.checklistItem.create(
         { status: itemStatuses.ACTIVE.id },
         node.content
       );
@@ -440,5 +438,42 @@ export function filterInactiveItems() {
     }
   });
 
+  return tr;
+}
+
+function findNodePos(doc, nodeType) {
+  let res = null;
+  doc.descendants((child, pos) => {
+    if (res !== null) {
+      return false;
+    }
+    if (child.type === nodeType) {
+      res = [pos, pos + child.nodeSize];
+      return false;
+    }
+    return true;
+  });
+  return res;
+}
+
+export function getAutofillTitleTr(tr) {
+  const schema = buildSchema();
+  const [titleStart, titleEnd] = findNodePos(tr.doc, schema.nodes.title);
+  const title = dates.getDayTitle();
+  tr.insertText(title, titleStart + 1, titleEnd - 1);
+  return tr;
+}
+
+export function autofillTitle() {
+  const view = getEditorView();
+  const tr = getAutofillTitleTr(view.state.tr);
+  view.dispatch(tr);
+}
+
+export function autofillSnapshot() {
+  const view = getEditorView();
+  let tr = view.state.tr;
+  tr = getFilterInactiveItemsTr(tr);
+  tr = getAutofillTitleTr(tr);
   view.dispatch(tr);
 }

@@ -81,7 +81,8 @@ li:hover {
   <div class="dropdown-menu">
     <ol>
       <li id="all-snapshots">All snapshots</li>
-      <li id="new-snapshot">New snapshot</li>
+      <li id="new-snapshot">Autofill new snapshot</li>
+      <li id="autofill-title">Autofill title</li>
       <li id="sign-out">Sign out</li>
     </ol>
   </div>
