@@ -55,7 +55,6 @@ function sendTransactionToFirebase(documentId, view) {
             nextTransactionId !== 0 &&
             nextTransactionId % UPDATE_CACHE_INTERVAL === 0
           ) {
-            console.log('writing document cache');
             persistence.writeDocumentCache(
               documentId,
               nextTransactionId,
@@ -90,7 +89,6 @@ function subscribeToTransactions(documentId, view) {
     persistence.getCurrentTransactionIdRef(documentId)
       .on('value', snapshot => {
         const transactionId = snapshot.val();
-        console.log('on value');
         if (transactionId !== (NEXT_TRANSACTION_ID.value - 1)) {
           persistence.getTransactionsRef(documentId)
             .orderByChild('id')
