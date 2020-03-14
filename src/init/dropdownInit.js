@@ -1,7 +1,9 @@
 import firebase from 'firebase/app';
+import 'firebase/auth';
 import 'firebase/database';
 
 import * as persistence from '../persistence';
+import { transformObjectPrototypes } from '../util';
 import {
   NEXT_TRANSACTION_ID,
   autofillTitle,
@@ -31,7 +33,7 @@ export default () => {
       return persistence.writeNewSnapshot(
         documentId,
         NEXT_TRANSACTION_ID.value,
-        getEditorView().state.toJSON()
+        transformObjectPrototypes(getEditorView().state.toJSON())
       )
       .then(autofillSnapshot)
       .then(menu.close);

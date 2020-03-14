@@ -2,7 +2,7 @@ import { Step } from 'prosemirror-transform';
 import { receiveTransaction, sendableSteps } from 'prosemirror-collab';
 
 import * as persistence from '../persistence';
-import { PromiseWorker } from '../util';
+import { PromiseWorker, transformObjectPrototypes } from '../util';
 import {
   NEXT_TRANSACTION_ID,
   initializeEditorView,
@@ -10,23 +10,6 @@ import {
 } from '../proseMirror';
 
 const UPDATE_CACHE_INTERVAL = 10;
-
-/**
- * Take the output of Node.toJSON and make sure all objects have the standard
- * Object prototype (instead of null), because that is what Firebase expects.
- */
-function transformObjectPrototypes(obj) {
-  if (typeof obj !== 'object') {
-    return obj;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(transformObjectPrototypes);
-  }
-  return Object.entries(obj).reduce((acc, [k, v]) => {
-    acc[k] = transformObjectPrototypes(v);
-    return acc;
-  }, {});
-}
 
 /**
  * Send uncommitted transactions to Firebase
@@ -77,7 +60,7 @@ function sendTransactionToFirebase(documentId, view) {
             persistence.writeDocumentCache(
               documentId,
               nextTransactionId,
-              stateJson,
+              transformObjectPrototypes(stateJson),
             );
           }
           receiveFirebaseTransaction(view, snapshot.val());
