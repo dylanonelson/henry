@@ -15,6 +15,49 @@ export function isNodeType(node, typeName) {
   return node.type.name === typeName;
 }
 
+function updateStatus(getPos, statusId) {
+  return function (state, dispatch) {
+    const tr = state.tr
+    const node = state.doc.nodeAt(getPos());
+    const nextAttrs = Object.assign({}, node.attrs, {
+      status: statusId,
+    });
+
+    const pos = getPos();
+    const currentNode = state.doc.resolve(pos).nodeAfter;
+
+    tr.delete(
+      pos,
+      pos + currentNode.nodeSize,
+    );
+
+    let lastPos = null;
+    let nextPos = null;
+    let posHasBeenFound = false;
+    tr.doc.descendants((node, pos) => {
+      if (node.type.name !== 'checklistItem' || posHasBeenFound) {
+        return;
+      }
+      // The end of the current item
+      lastPos = pos + node.nodeSize;
+      const nodeStatus = itemStatuses.valueOf(node.attrs.status);
+      const nextStatus = itemStatuses.valueOf(nextAttrs.status);
+      if (nodeStatus.ordinal() > nextStatus.ordinal()) {
+        nextPos = pos;
+        posHasBeenFound = true;
+      }
+    });
+
+    const nextNode =
+      schema.nodes.checklistItem.create(nextAttrs, currentNode.content);
+
+    tr.insert(nextPos || lastPos, nextNode);
+
+    dispatch(tr);
+    return true;
+  }
+}
+
 let schema = null;
 
 export function buildSchema() {
@@ -205,6 +248,33 @@ export function buildPlugins(...withPlugins) {
         },
       },
     }),
+    new Plugin({
+      props: {
+        handleKeyDown(view, event) {
+          const { state:  { selection: { $from, empty } } } = view;
+          if (!empty) {
+            return false;
+          }
+          if (event.which !== 32 || event.getModifierState('Control') === false) {
+            return false;
+          }
+          const { parent } = $from;
+          if (!isNodeType(parent, 'checklistItem')) {
+            return false;
+          }
+
+          const currentStatusId = parent.attrs.status;
+          const nextStatusId = currentStatusId === itemStatuses.ACTIVE.id
+            ? itemStatuses.COMPLETE.id
+            : itemStatuses.ACTIVE.id;
+
+          const pos = $from.before();
+          updateStatus(() => pos, nextStatusId)(view.state, view.dispatch);
+
+          return true;
+        },
+      },
+    }),
     ...withPlugins,
   ];
 
@@ -249,60 +319,21 @@ export function buildNodeViews() {
       }
       toggle.appendChild(toggleBtn);
 
-      const handler = event => {
+      const clickHandler = event => {
         let { statusId } = event.target.dataset;
 
         if (statusId === undefined) {
-          return;
+          return false;
         }
         if (statusId === currentStatus.id) {
           statusId = itemStatuses.ACTIVE.id;
         }
-
-        const tr = editorView.state.tr;
-        const nextAttrs = Object.assign({}, node.attrs, {
-          status: statusId,
-        });
-
-        const pos = getPos();
-        const currentNode = editorView.state.doc.resolve(pos).nodeAfter;
-
-        tr.delete(
-          pos,
-          pos + currentNode.nodeSize,
-        );
-
-        let lastPos = null;
-        let nextPos = null;
-        let posHasBeenFound = false;
-        tr.doc.descendants((node, pos) => {
-          if (node.type.name !== 'checklistItem' || posHasBeenFound) {
-            return;
-          }
-          // The end of the current item
-          lastPos = pos + node.nodeSize;
-          const nodeStatus = itemStatuses.valueOf(node.attrs.status);
-          const nextStatus = itemStatuses.valueOf(nextAttrs.status);
-          if (nodeStatus.ordinal() > nextStatus.ordinal()) {
-            nextPos = pos;
-            posHasBeenFound = true;
-          }
-        });
-
-        const nextNode =
-          schema.nodes.checklistItem.create(nextAttrs, currentNode.content);
-
-        tr.insert(nextPos || lastPos, nextNode);
-
-        editorView.dispatch(tr);
-
-        if (viewHadFocusBeforeClick) {
-          editorView.focus();
-        }
+        updateStatus(getPos, statusId)(editorView.state, editorView.dispatch);
+        return true;
       };
 
-      controls.addEventListener('click', handler);
-      toggleBtn.addEventListener('click', handler);
+      controls.addEventListener('click', clickHandler);
+      toggleBtn.addEventListener('click', clickHandler);
 
       const contentDOM = document.createElement('div');
       contentDOM.classList.add('checklist-item-content');
@@ -320,8 +351,8 @@ export function buildNodeViews() {
       return {
         contentDOM,
         destroy() {
-          controls.removeEventListener('click', handler);
-          toggleBtn.addEventListener('click', handler);
+          controls.removeEventListener('click', clickHandler);
+          toggleBtn.removeEventListener('click', clickHandler);
         },
         dom,
       };
@@ -363,7 +394,6 @@ export function buildEditorProps() {
 
 let view = null;
 let viewDom = null;
-let viewHadFocusBeforeClick = false;
 
 export function initializeEditorView() {
   if (view !== null) {
@@ -384,11 +414,6 @@ export function initializeEditorView() {
   view.dom.spellcheck = false;
 
   document.body.removeChild(viewDom);
-
-  // Track when a click has unfocused the editor view so we can restore focus when necessary
-  document.addEventListener('mousedown', () => {
-    viewHadFocusBeforeClick = view.hasFocus();
-  });
 
   return view;
 }
