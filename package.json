@@ -38,7 +38,7 @@
     "prosemirror-view": "^1.13.7",
     "style-loader": "^1.1.2",
     "template-dom-loader": "^0.1.1",
-    "url-parse": "^1.4.7",
+    "url-parse": "^1.5.9",
     "webpack": "^4.42.0",
     "webpack-bundle-analyzer": "^3.6.1",
     "webpack-cli": "^3.3.10",
